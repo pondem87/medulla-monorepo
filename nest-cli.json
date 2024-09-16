@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json.schemastore.org/nest-cli",
+  "collection": "@nestjs/schematics",
+  "sourceRoot": "apps/medulla/src",
+  "compilerOptions": {
+    "deleteOutDir": true,
+    "webpack": true,
+    "tsConfigPath": "apps/medulla/tsconfig.app.json"
+  },
+  "monorepo": true,
+  "root": "apps/medulla",
+  "projects": {
+    "medulla": {
+      "type": "application",
+      "root": "apps/medulla",
+      "entryFile": "main",
+      "sourceRoot": "apps/medulla/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/medulla/tsconfig.app.json"
+      }
+    },
+    "subscription": {
+      "type": "application",
+      "root": "apps/subscription",
+      "entryFile": "main",
+      "sourceRoot": "apps/subscription/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/subscription/tsconfig.app.json"
+      }
+    },
+    "medulla-users": {
+      "type": "application",
+      "root": "apps/medulla-users",
+      "entryFile": "main",
+      "sourceRoot": "apps/medulla-users/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/medulla-users/tsconfig.app.json"
+      }
+    },
+    "medulla-ai": {
+      "type": "application",
+      "root": "apps/medulla-ai",
+      "entryFile": "main",
+      "sourceRoot": "apps/medulla-ai/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/medulla-ai/tsconfig.app.json"
+      }
+    },
+    "medulla-whatsapp": {
+      "type": "application",
+      "root": "apps/medulla-whatsapp",
+      "entryFile": "main",
+      "sourceRoot": "apps/medulla-whatsapp/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/medulla-whatsapp/tsconfig.app.json"
+      }
+    },
+    "storage": {
+      "type": "application",
+      "root": "apps/storage",
+      "entryFile": "main",
+      "sourceRoot": "apps/storage/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/storage/tsconfig.app.json"
+      }
+    },
+    "payment": {
+      "type": "application",
+      "root": "apps/payment",
+      "entryFile": "main",
+      "sourceRoot": "apps/payment/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/payment/tsconfig.app.json"
+      }
+    },
+    "medulla-common": {
+      "type": "library",
+      "root": "libs/medulla-common",
+      "entryFile": "index",
+      "sourceRoot": "libs/medulla-common/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/medulla-common/tsconfig.lib.json"
+      }
+    }
+  }
+}
