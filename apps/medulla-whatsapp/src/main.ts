@@ -10,7 +10,7 @@ async function bootstrap() {
   app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.RMQ,
     options: {
-      urls: [config.get<string>("MEDULLA_RMQ_URL")],
+      urls: [`${config.get<string>("MEDULLA_RMQ_URL")}:${config.get<string>("MEDULLA_RMQ_PORT")}`],
       queue: config.get<string>("WHATSAPP_RMQ_QUEUE_NAME"),
       queueOptions: {
         durable: config.get<string>("MEDULLA_RMQ_QUEUE_DURABLE") === "true" ? true : false
@@ -20,7 +20,7 @@ async function bootstrap() {
 
   await app.startAllMicroservices()
 
-  const port = parseInt(config.get<string>("MEDULLA_WHATSAPP_PORT")) || 3001
+  const port = parseInt(config.get<string>("MEDULLA_WHATSAPP_PORT")) || 3000
   await app.listen(port);
   
 }

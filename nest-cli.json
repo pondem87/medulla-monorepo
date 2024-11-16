@@ -5,7 +5,9 @@
   "compilerOptions": {
     "deleteOutDir": true,
     "webpack": true,
-    "tsConfigPath": "apps/medulla/tsconfig.app.json"
+    "tsConfigPath": "apps/medulla/tsconfig.app.json",
+    "assets": ["**/*.proto"],
+    "watchAssets": true
   },
   "monorepo": true,
   "root": "apps/medulla",
@@ -26,15 +28,6 @@
       "sourceRoot": "apps/subscription/src",
       "compilerOptions": {
         "tsConfigPath": "apps/subscription/tsconfig.app.json"
-      }
-    },
-    "medulla-users": {
-      "type": "application",
-      "root": "apps/medulla-users",
-      "entryFile": "main",
-      "sourceRoot": "apps/medulla-users/src",
-      "compilerOptions": {
-        "tsConfigPath": "apps/medulla-users/tsconfig.app.json"
       }
     },
     "medulla-ai": {
@@ -79,7 +72,9 @@
       "entryFile": "index",
       "sourceRoot": "libs/medulla-common/src",
       "compilerOptions": {
-        "tsConfigPath": "libs/medulla-common/tsconfig.lib.json"
+        "tsConfigPath": "libs/medulla-common/tsconfig.lib.json",
+        "assets": ["**/*.proto"],
+        "watchAssets": true
       }
     }
   }

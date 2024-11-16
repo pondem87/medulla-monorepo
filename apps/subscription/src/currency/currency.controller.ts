@@ -8,28 +8,24 @@ import { UpdateCurrencyDto } from './dto/update-currency.dto';
 export class CurrencyController {
   constructor(private readonly currencyService: CurrencyService) {}
 
-  @MessagePattern('createCurrency')
-  create(@Payload() createCurrencyDto: CreateCurrencyDto) {
+  create(createCurrencyDto: CreateCurrencyDto) {
     return this.currencyService.create(createCurrencyDto);
   }
 
-  @MessagePattern('findAllCurrency')
   findAll() {
     return this.currencyService.findAll();
   }
 
-  @MessagePattern('findOneCurrency')
-  findOne(@Payload() id: number) {
-    return this.currencyService.findOne(id);
+  findOne(isoCode: string) {
+    return this.currencyService.findOne(isoCode);
   }
 
-  @MessagePattern('updateCurrency')
-  update(@Payload() updateCurrencyDto: UpdateCurrencyDto) {
-    return this.currencyService.update(updateCurrencyDto.id, updateCurrencyDto);
+  update(isoCode: string, updateCurrencyDto: UpdateCurrencyDto) {
+    return this.currencyService.update(isoCode, updateCurrencyDto);
   }
 
   @MessagePattern('removeCurrency')
-  remove(@Payload() id: number) {
-    return this.currencyService.remove(id);
+  remove(@Payload() isoCode: string) {
+    return this.currencyService.remove(isoCode);
   }
 }

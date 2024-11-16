@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { createLogger, transports, format, Logger } from "winston"
 
 // import * as Loggly from "winston-loggly-bulk"
-var {Loggly} = require('winston-loggly-bulk')
+var { Loggly } = require('winston-loggly-bulk')
 
 const { combine, timestamp, json, errors, prettyPrint } = format
 
@@ -30,6 +30,14 @@ export class LoggingService {
 
             case "INFO":
                 logLevel = "info"
+                break;
+
+            case "WARN":
+                logLevel = "warn"
+                break;
+
+            case "ERROR":
+                logLevel = "error"
                 break;
 
             default:

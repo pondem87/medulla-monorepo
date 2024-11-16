@@ -23,7 +23,7 @@ export class LLMQueueService {
         this.logger.info("Initializing LLMQueueService")
     }
 
-    async sendPlainTextToLLM(contact: Contact, prompt: string) {
+    sendPlainTextToLLM(contact: Contact, prompt: string): void {
         const payload: LLMQueueMessage = {
             contact,
             prompt,

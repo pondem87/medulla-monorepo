@@ -1,2 +1,3 @@
 export const UUID_LENGTH=36
 export const MAX_USER_NUMBER_LENGTH=20
+export const DEFAULT_MONEY_MULTIPLIER=1_00_000_000n

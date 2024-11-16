@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: medulla-config
+data:
+  {{- range $key, $value := .Values.configMap }}
+    {{ $key }}: {{ $value | quote }}
+  {{- end }}
+  

@@ -5,5 +5,8 @@
   "testRegex": ".e2e-spec.ts$",
   "transform": {
     "^.+\\.(t|j)s$": "ts-jest"
+  },
+  "moduleNameMapper": {
+    "^@app/medulla-common(.*)$": "D:/PROJECTS/Projects 2024/medulla/libs/medulla-common/src$1"
   }
 }

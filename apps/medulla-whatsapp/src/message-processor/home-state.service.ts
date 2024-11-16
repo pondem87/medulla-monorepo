@@ -25,19 +25,20 @@ export class HomeStateService implements IRunStates {
 
     async runImplementedStates(ismActor: StateMachineActor<ISMEventType, ISMContext>, message: Messages): Promise<boolean> {
         if (ismActor.getSnapshot().matches("home")) {
-            this.processHomeMessage(ismActor, message)
-            return true
+            return await this.processHomeMessage(ismActor, message)
         } else {
             return false
         }
     }
 
-    processHomeMessage(ismActor: StateMachineActor<ISMEventType, ISMContext>, message: Messages): void {
+    async processHomeMessage(ismActor: StateMachineActor<ISMEventType, ISMContext>, message: Messages): Promise<boolean> {
         if (message.text) {
             // process text via llm
-            this.llmQueueService.sendPlainTextToLLM(ismActor.getSnapshot().context.contact, message.text.body)
+            await this.llmQueueService.sendPlainTextToLLM(ismActor.getSnapshot().context.contact, message.text.body)
+            return true
         } else if (message.interactive?.list_reply) {
             // menu selection
+            return false
         }
     }
 

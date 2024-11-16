@@ -63,7 +63,9 @@ export class ChatMessageHistory extends BaseListChatMessageHistory {
     }
 
     async addMessages(messages: BaseMessage[]): Promise<void> {
-        messages.flatMap(message => this.addMessage(message))
+        for (let i = 0; i < messages.length; i++) {
+            await this.addMessage(messages[i])
+        }
     }
 
     async clear(): Promise<void> {

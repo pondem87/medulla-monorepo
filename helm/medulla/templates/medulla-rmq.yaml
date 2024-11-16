@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.rmq.name }}-depl
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: {{ .Values.rmq.name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.rmq.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.rmq.name }}
+    spec:
+      containers:
+      - name: {{ .Values.rmq.name }}-container
+        image: {{ .Values.rmq.image.repo }}:{{ .Values.rmq.image.tag }}
+        ports:
+        - containerPort: {{ .Values.rmq.port }}
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.rmq.name }}-service
+spec:
+  selector:
+    app: {{ .Values.rmq.name }}
+  ports:
+  - protocol: TCP
+    port: {{ .Values.rmq.port }}
+    targetPort: {{ .Values.rmq.port }}

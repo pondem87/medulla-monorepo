@@ -9,7 +9,7 @@ export class ChatMessage extends EntityCommon {
     @PrimaryGeneratedColumn("uuid")
     id: string
 
-    @ManyToOne(() => ChatHistory)
+    @ManyToOne(() => ChatHistory, (chatHistory) => chatHistory.messages, {onDelete: "CASCADE"})
     chatHistory: ChatHistory
 
     @Column("simple-json")

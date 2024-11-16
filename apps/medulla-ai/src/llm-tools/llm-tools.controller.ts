@@ -23,7 +23,7 @@ export class LlmToolsController {
 	}
 
 	@EventPattern(LLMEventPattern)
-	async processPayload(payload: LLMQueueMessage): Promise<void> {
+	async processPayload(payload: LLMQueueMessage): Promise<boolean> {
 		return this.llmToolsService.processPayload(payload)
 	}
 }

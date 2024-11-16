@@ -6,7 +6,6 @@ import { Repository } from "typeorm";
 import { Logger } from "winston";
 import { ChatMessage } from "./entities/chat-message.entity";
 import { LoggingService } from "@app/medulla-common/logging/logging.service";
-import { Messages } from "./dto/message.dto";
 
 
 @Injectable()
@@ -27,10 +26,6 @@ export class ChatMessageHistoryService {
 		})
 	}
 
-	async processMessage(message: Messages) {
-		throw new Error('Method not implemented.');
-	}
-
 	async getUsersChatHistory(userNumber: string): Promise<ChatHistory | null> {
 		try {
 			return await this.chatHistoryRepository.findOne({
@@ -44,7 +39,7 @@ export class ChatMessageHistoryService {
 		}
 	}
 
-	async createChatMessage(chatHistory: ChatHistory, message: StoredMessage) {
+	async createChatMessage(chatHistory: ChatHistory, message: StoredMessage): Promise<ChatMessage | null> {
         try {
 			const chatMessage = new ChatMessage()
 			chatMessage.chatHistory = chatHistory

@@ -1,0 +1,80 @@
+
+{{- range .Values.microservices }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .app_name }}-depl
+  namespace: {{ $.Values.global.namespace }}
+  labels:
+    app: {{ .app_name }}
+spec:
+  replicas: {{ .replicas }}
+  selector:
+    matchLabels:
+      app: {{ .app_name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .app_name }}
+    spec:
+      containers:
+      - name: {{ .app_name }}-container
+        image: {{ .image.repo }}:{{ .image.tag }}
+
+        ports:
+        {{- range .ports }}
+        - containerPort: {{ .number }}
+        {{- end }}
+        
+        env:
+        {{- range $.Values.global.config_env }}
+        - name: {{ . }}
+          valueFrom:
+            configMapKeyRef:
+              name: medulla-config
+              key: {{ . }}
+        {{- end }}
+
+        {{- range .plain_env }}
+        - name: {{ .name }}
+          value: {{ .value | quote }}
+        {{- end }}
+
+        {{- range $.Values.global.secret_env }}
+        - name: {{ . }}
+          valueFrom:
+            secretKeyRef:
+              name: medulla-secret
+              key: {{ . }}
+        {{- end }}
+
+        {{- range .secret_env }}
+        - name: {{ . }}
+          valueFrom:
+            secretKeyRef:
+              name: medulla-secret
+              key: {{ . }}
+        {{- end }}
+        
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .app_name }}-service
+spec:
+  selector:
+    app: {{ .app_name }}
+  ports:
+  {{- range .ports }}
+  - protocol: TCP
+    {{- if .name }}
+    name: {{ .name }}
+    {{- end }}
+    port: {{ .number }}
+    targetPort: {{ .number }}
+  {{- end }}
+
+---
+
+{{- end }}

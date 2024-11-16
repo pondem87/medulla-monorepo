@@ -1,5 +1,5 @@
 import { StateMachineActor } from "@app/medulla-common/common/types";
-import { assign, createActor, createMachine, fromPromise } from "xstate";
+import { assign, createActor, createMachine, fromPromise, setup } from "xstate";
 import { InteractiveStateMachine, ISMContext, ISMEventType } from "./interactive.state-machine";
 import { Injectable } from "@nestjs/common";
 import { LoggingService } from "@app/medulla-common/logging/logging.service";
@@ -14,14 +14,33 @@ import { Contact } from "./dto/contact.dto";
 @Injectable()
 export class MessageProcessingStateMachineProvider {
     private logger: Logger
-    private MessageProcessingStateMachine = createMachine({
-        /** @xstate-layout N4IgpgJg5mDOIC5QFs6wIYwLQAcBOA9gMZoCWAdlAHQDKALunWAEph16lgBu6ANgMQQC5MFQpcCAa1F42HbmADCAC0b1GYANoAGALqJQOArFJ1SwgyAAeiAKwB2e1QCcrt+7cAaEAE9EWAEZbKgCANnCIyPD7AIBfWO9UWAxsfGIySloGJlZ2Th4BMDxCPCocXkYAMwI8ZCpZPIUVNWytPUsjEzMLJGtEAPsAZhcPUecAFm8-BADBgCYqcbColfjEtEwwXEISZIpqdSYAQSJu8lhBYVFxKRkAV3JmukOwE7OdfV7O03NySxsZnNQtoqNpBqFxrYAByDWFwwZTfxOZYrSIxNYgJIpLZpXYmTIvN6-C5FEplCp0aq1eoPJ6E06-D4dYw-HqgAHAgJUcHOezOFERWyImbjUJUWzaSVS6WSwYYrGbbbpPYE1r0GqbS4iMTkCTSKgYLhKVTPVpMr4ss7-fpzezBcbjW3aGHw2HCgK8lwC1GheUbVI7DIHNV0DUwfikmrkqo1OqG40tDTmwyW37WhDOQZQxbeqJC3z9T38n2ReIJEDkAgQOCWBUB5X4qDMrpp3oAgJg7mu7uDALCwKDZEliLOP3JRW4oNZDS5eQFZusv5t-q2Lk97t9gsILDjZxUYcRexj7FKvH7afHBnCeAWltsvoIKEBbNQ7T2ObFlb98bZ3MrI-lnWOKBiqwYaOqeCbAuVrLjMAxcq44x8rm+bTPYIIuuusLjMeE4gY2VAAAr4QAYugpC8HcsjQa27KILu4z7uM8wfrmCJbkCjF-miuH1memTEQ2NB3EQeI0fe7ZzFCwRQu+gzONC3bCraYrOlh8y+mWQA */
-        id: "message-processing",
+    private MessageProcessingStateMachine = setup({
         types: {
             events: {} as MPSMEventType,
             context: {} as MPSMContext,
-            input: {} as MPSMInput
+            input: {} as MPSMInput,
+            children: {} as {
+                getPersistedInteractiveState: "getPersistedInteractiveState";
+                performStateAction: "performStateAction";
+                persistInteractiveState: "persistInteractiveState";
+            }
         },
+        actors: {
+            getPersistedInteractiveState: fromPromise(async ({input}: {input: {contact: Contact}}) => {
+                const persisted = await this.getPersistedInteractiveState(input)
+                return {...persisted}
+            }),
+            performStateAction: fromPromise(async ({input}: {input: {context: MPSMContext}}) => {
+                return await this.performStateAction(input)
+            }),
+            persistInteractiveState: fromPromise(async ({input}: {input: {context: MPSMContext}}) => {
+                return await this.persistInteractiveState(input)
+            })
+        }
+    })
+    .createMachine({
+        /** @xstate-layout N4IgpgJg5mDOIC5QFs6wIYwLQAcBOA9gMZoCWAdlAHQDKALunWAEph16lgBu6ANgMQQC5MFQpcCAa1F42HbmADCAC0b1GYANoAGALqJQOArFJ1SwgyAAeiAKwB2e1QCcrt+7cAaEAE9EWAEZbKgCANnCIyPD7AIBfWO9UWAxsfGIySloGJlZ2Th4BMDxCPCocXkYAMwI8ZCpZPIUVNWytPUsjEzMLJGtEAPsAZhcPUecAFm8-BADBgCYqcbColfjEtEwwXEISZIpqdSYAQSJu8lhBYVFxKRkAV3JmukOwE7OdfV7O03NySxsZnNQtoqNpBqFxrYAByDWFwwZTfxOZYrSIxNYgJIpLZpXYmTIvN6-C5FEplCp0aq1eoPJ6E06-D4dYw-HqgAHAgJUcHOezOFERWyImbjUJUWzaSVS6WSwYYrGbbbpPYE1r0GqbS4iMTkCTSKgYLhKVTPVpMr4ss7-fpzezBcbjW3aGHw2HCgK8lwC1GheUbVI7DIHNV0DUwfikmrkqo1OqG40tDTmwyW37WhDOQZQxbeqJC3z9T38n2ReIJEDkAgQOCWBUB5X4qDMrpp3oAgJg7mu7uDALCwKDZEliLOP3JRW4oNZDS5eQFZusv5t-q2Lk97t9gsILDjZxUYcRexj7FKvH7afHBnCeAWltsvoIKEBbNQ7T2ObFlb98bZ3MrI-lnWOKBiqwYaOqeCbAuVrLjMAxcq44x8rm+bTPYIIuuusLjMeE4gY2VAAAr4QAYugpC8HcsjQa27KILu4z7uM8wfrmCJbkCjF-miuH1memTEQ2NB3EQeI0fe7ZzFCwRQu+gzONC3bCraYrOlh8y+mWQA */
+        id: "message-processing",
         context: ({input}) => ({
             contact: input.contact,
             message: input.message,
@@ -30,7 +49,7 @@ export class MessageProcessingStateMachineProvider {
         states: {
             StateRetrieval: {
                 invoke: {
-                    id: "retrieveChatState",
+                    id: "getPersistedInteractiveState",
                     src: "getPersistedInteractiveState",
                     input: ({ context: { contact }}) => ({ contact }),
                     onDone: {
@@ -50,7 +69,7 @@ export class MessageProcessingStateMachineProvider {
             },
             StateActions: {
                 invoke: {
-                    id: "runChatStateAction",
+                    id: "performStateAction",
                     src: "performStateAction",
                     input: ({ context }) => ({ context }),
                     onDone: {
@@ -66,7 +85,7 @@ export class MessageProcessingStateMachineProvider {
             },
             StateStorage: {
                 invoke: {
-                    id: "saveChatState",
+                    id: "persistInteractiveState",
                     src: "persistInteractiveState",
                     input: ({ context }) => ({ context }),
                     onDone: {
@@ -86,19 +105,6 @@ export class MessageProcessingStateMachineProvider {
             ProcessSuccess: {
                 tags: ["final", "success"]
             }
-        }
-    }, {
-        actors: {
-            getPersistedInteractiveState: fromPromise(async ({input}) => {
-                const persisted = await this.getPersistedInteractiveState(input as { contact: Contact })
-                return persisted
-            }),
-            performStateAction: fromPromise(async ({input}) => {
-                return await this.performStateAction(input as {context: MPSMContext})
-            }),
-            persistInteractiveState: fromPromise(async ({input}) => {
-                return await this.persistInteractiveState(input as {context: MPSMContext})
-            })
         }
     })
 

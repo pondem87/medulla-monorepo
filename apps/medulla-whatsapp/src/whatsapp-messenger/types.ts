@@ -133,3 +133,25 @@ export interface TemplateMessageBody {
         "components": Component[]
     }
 }
+
+// messageBody
+export type MessageBody = TemplateMessageBody | InteractiveReplyButtonsMessageBody | InteractiveListMessageBody
+    | TextMessageBody
+
+
+// endpoint response
+export type MessagesResponse = {
+    messaging_product: MessagingProduct,
+    contacts: [
+      {
+        input: string,
+        wa_id: string
+      }
+    ],
+    messages: [
+      {
+        id: string,
+        message_status : "accepted" | "held_for_quality_assessment",
+      }
+    ]
+  }

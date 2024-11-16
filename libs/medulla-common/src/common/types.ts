@@ -17,3 +17,8 @@ export interface StateMachineSnapshot<Context> {
     output: any;
     status: string;
 }
+
+export interface Money {
+    amount: bigint;
+    multiplier: bigint;
+}

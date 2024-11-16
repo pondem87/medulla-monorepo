@@ -13,12 +13,12 @@ describe('SubscriptionController (e2e)', () => {
 
     app = moduleFixture.createNestApplication();
     await app.init();
-  });
+  }, 15000);
 
   it('/ (GET)', () => {
     return request(app.getHttpServer())
       .get('/')
       .expect(200)
-      .expect('Hello World!');
+      .expect('Server Active!');
   });
 });

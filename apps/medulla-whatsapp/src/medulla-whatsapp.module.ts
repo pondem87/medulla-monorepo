@@ -8,6 +8,7 @@ import { MessageProcessorModule } from './message-processor/message-processor.mo
 import { WhatsappMessengerModule } from './whatsapp-messenger/whatsapp-messenger.module';
 import { WhatsappModule } from './whatsapp/whatsapp.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { LoggingService } from '@app/medulla-common/logging/logging.service';
 import * as fs from 'fs';
 
 @Module({
@@ -21,12 +22,12 @@ import * as fs from 'fs';
         port: config.get<number>("DB_PORT"),
         username: config.get<string>("DB_USERNAME"),
         password: config.get<string>("DB_PASSWORD"),
-        database: config.get<string>("DB_DATABASE"),
+        database: config.get<string>("DB_DATABASE"), 
         autoLoadEntities: config.get<string>("DB_AUTOLOAD_ENTITIES") === "true",
         synchronize: config.get<string>("DB_SYNCHRONISE") === "true",
         extra: {
           ssl: {
-            ca: fs.readFileSync("af-south-1-bundle.pem")
+            ca: fs.readFileSync(config.get<string>("DB_CERT_PATH"))
           }
         }
       }),
@@ -40,7 +41,7 @@ import * as fs from 'fs';
   ],
   controllers: [MedullaWhatsappController],
   providers: [
-    MedullaWhatsappService
+    MedullaWhatsappService, LoggingService, ConfigService
   ],
 })
 export class MedullaWhatsappModule {}

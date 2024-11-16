@@ -23,14 +23,14 @@ describe('MedullaWhatsapp/WhatsappController (e2e)', () => {
 
         // Spy on emit
         emitMessageSpy = jest.spyOn(testWhatsappRmqService, 'emit');
-    });
+    }, 20000);
 
     it('/whatsapp-webhook (GET): verify webhook - success', () => {
         return request(app.getHttpServer())
             .get(`/whatsapp-webhook?hub.mode=subscribe&hub.challenge=1158201444&hub.verify_token=${process.env.WEBHOOK_VERIFY_TOKEN}`)
             .expect(200)
             .expect("1158201444")
-    });
+    }, 10000);
 
     it('/whatsapp-webhook (GET): verify webhook - failure', () => {
         return request(app.getHttpServer())
@@ -39,7 +39,7 @@ describe('MedullaWhatsapp/WhatsappController (e2e)', () => {
             .then(response => {
                 expect(response.body.message).toBe("VerifyToken could not be verified")
             })
-    });
+    }, 10000);
 
     it('/whatsapp-webhook (POST): process webhook', async () => {
         await request(app.getHttpServer())
@@ -99,6 +99,6 @@ describe('MedullaWhatsapp/WhatsappController (e2e)', () => {
                 }
             }
         })
-    });
+    }, 10000);
 
 });

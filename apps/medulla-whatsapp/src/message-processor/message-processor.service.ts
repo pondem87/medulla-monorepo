@@ -24,7 +24,7 @@ export class MessageProcessorService {
 		this.logger.info("Initializing MessageProcessorService")
 	}
 
-	async processMessage(payload: { contact: Contact, message: Messages }) {
+	async processMessage(payload: { contact: Contact, message: Messages }): Promise<void> {
 		const smActor = this.messageProcessingStateMachineProvider.getMachineActor({
 			contact: payload.contact,
 			message: payload.message
@@ -37,7 +37,7 @@ export class MessageProcessorService {
 			(snapshot) => snapshot.hasTag("final")
 		)
 
-		if (smActor.getSnapshot().matches("ProcessFailure")) {
+		if (smActor.getSnapshot().matches("Failure")) {
 			this.logger.error("Failed to process message", {error: smActor.getSnapshot().context.error})
 		}
 	}

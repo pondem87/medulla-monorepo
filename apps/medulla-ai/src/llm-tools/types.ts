@@ -1,4 +1,5 @@
 export enum LLMModelType {
-    TEXT = "text",
-    IMAGE = "image"
+    CHAT = "chat",
+    IMAGE = "image",
+    EMBEDDING = "embedding"
 }

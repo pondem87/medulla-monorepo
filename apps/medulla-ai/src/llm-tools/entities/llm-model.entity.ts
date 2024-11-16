@@ -1,7 +1,9 @@
-import { Column, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 import { LLMModelType } from "../types";
 import { EntityCommon } from "@app/medulla-common/common/entity-common";
+import { Money } from "@app/medulla-common/common/types";
 
+@Entity()
 export class LLMModel extends EntityCommon {
     @PrimaryGeneratedColumn("uuid")
     id: string
@@ -11,15 +13,17 @@ export class LLMModel extends EntityCommon {
 
     @Column({
         type: "enum",
-        enum: LLMModelType,
-        default: LLMModelType.TEXT,
+        enum: LLMModelType
     })
     type: LLMModelType
 
-    @Column("numeric", { precision: 10, scale: 6})
-    costPerInputToken: number
+    @Column("bigint")
+    costPerInputToken: bigint
 
-    @Column("numeric", { precision: 10, scale: 6})
-    costPerOuputToken: number
+    @Column("bigint")
+    costPerOutputToken: bigint
+    
+    @Column("bigint")
+    costMultiplier: bigint
 }
 
