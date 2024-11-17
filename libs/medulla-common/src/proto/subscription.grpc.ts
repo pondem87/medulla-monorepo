@@ -1,16 +1,18 @@
+import { Observable } from "rxjs";
+
 export type UserId = {
     userId: string;
 }
 
 export type UserBalance = {
-    amount: bigint
-    multiplier: bigint
+    amount: string
+    multiplier: string
     currency: string
 }
 
 export type UserBalanceDelta = {
-    amount: bigint
-    multiplier: bigint
+    amount: string
+    multiplier: string
     currency: string
 }
 
@@ -19,7 +21,12 @@ export type UserBalanceUpdate = {
     delta: UserBalanceDelta
 }
 
-export interface GrpcSubscriptionService {
+export interface GrpcSubscriptionClient {
+    checkUserBalance(userId: UserId): Observable<UserBalance>;
+    updateUserBalance(userBlanceUpdate: UserBalanceUpdate): Observable<UserBalance>;
+}
+
+export interface GrpcSubscriptionServer {
     checkUserBalance(userId: UserId): Promise<UserBalance>;
     updateUserBalance(userBlanceUpdate: UserBalanceUpdate): Promise<UserBalance>;
 }

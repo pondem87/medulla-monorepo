@@ -7,9 +7,8 @@ import { MedullaCommonModule } from '@app/medulla-common';
 import { LoggingService } from '@app/medulla-common/logging/logging.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { LlmToolsModule } from './llm-tools/llm-tools.module';
-import { SubscriptionService } from '@app/medulla-common/subscription/subscription.service';
-import { SubscriptionModule } from '@app/medulla-common/subscription/subscription.module';
 import * as fs from 'fs';
+import { SubscriptionModule } from './subscription/subscription.module';
 
 @Module({
   imports: [
@@ -41,8 +40,7 @@ import * as fs from 'fs';
   controllers: [MedullaAIController],
   providers: [
     MedullaAIService,
-    LoggingService,
-    SubscriptionService
+    LoggingService
   ],
 })
 export class MedullaAiModule {}

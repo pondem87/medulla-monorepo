@@ -17,8 +17,8 @@ import { LLMFuncToolsProvider } from './llm-func-tools.provider';
 import { LLMPrefsService } from './llm-prefs.service';
 import { LoggingService } from '@app/medulla-common/logging/logging.service';
 import { LLMModelService } from './llm-model.service';
-import { SubscriptionService } from '@app/medulla-common/subscription/subscription.service';
-import { SubscriptionModule } from '@app/medulla-common/subscription/subscription.module';
+import { SubscriptionModule } from '../subscription/subscription.module';
+import { SubscriptionService } from '../subscription/subscription.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([ChatHistory, ChatMessage, LLMModel, LLMPrefs]), SubscriptionModule],

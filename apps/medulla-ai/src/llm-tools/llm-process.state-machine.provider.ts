@@ -16,8 +16,8 @@ import { ClientProxy } from "@nestjs/microservices";
 import { MessengerRMQMessage } from "./dto/messenger-rmq-message.dto";
 import { LLMModelService } from "./llm-model.service";
 import { addMoney, getTotalCost } from "@app/medulla-common/common/functions";
-import { SubscriptionService } from "@app/medulla-common/subscription/subscription.service";
 import { ConfigService } from "@nestjs/config";
+import { SubscriptionService } from "../subscription/subscription.service";
 
 @Injectable()
 export class LLMProcessStateMachineProvider {
@@ -49,7 +49,8 @@ export class LLMProcessStateMachineProvider {
 
     checkUserBalance = async ({ input }: { input: { userId: string } }) => {
         const { amount, multiplier, currency } = await this.subscriptionService.checkUserBalance(input)
-        return { amount, multiplier, currency }
+        this.logger.debug("Checked user balance.", {amount: BigInt(amount), multiplier: BigInt(multiplier), currency})
+        return { amount: BigInt(amount), multiplier: BigInt(multiplier), currency }
     }
 
     initializeLLMTools = async ({ input }: { input: { userId: string } }) => {
@@ -117,8 +118,8 @@ export class LLMProcessStateMachineProvider {
             const newBalance = await this.subscriptionService.updateUserBalance({
                 userId: input.context.contact.wa_id,
                 delta: {
-                    amount: totalCost.amount,
-                    multiplier: totalCost.multiplier,
+                    amount: totalCost.amount.toString(),
+                    multiplier: totalCost.multiplier.toString(),
                     currency: BASE_CURRENCY_ISO
                 }
             })
@@ -233,7 +234,7 @@ export class LLMProcessStateMachineProvider {
                                 target: "Complete",
                                 actions: assign({
                                     userBalance: ({ event }) => ({
-                                        amount: { amount: event.output.amount, multiplier: event.output.multiplier },
+                                        amount: { amount: BigInt(event.output.amount), multiplier: BigInt(event.output.multiplier) },
                                         currency: event.output.currency
                                     })
                                 })

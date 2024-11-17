@@ -2,6 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: medulla-config
+  namespace: {{ .Values.global.namespace }}
 data:
   {{- range $key, $value := .Values.configMap }}
     {{ $key }}: {{ $value | quote }}

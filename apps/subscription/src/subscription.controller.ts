@@ -1,12 +1,12 @@
 import { Controller, Get } from '@nestjs/common';
 import { SubscriptionService } from './subscription.service';
-import { GrpcSubscriptionService, SubscriptionServiceName, UserBalance, UserBalanceUpdate, UserId } from '@app/medulla-common/proto/subscription.grpc';
 import { Logger } from 'winston';
 import { LoggingService } from '@app/medulla-common/logging/logging.service';
 import { GrpcMethod } from '@nestjs/microservices';
+import { GrpcSubscriptionServer, SubscriptionServiceName, UserBalance, UserBalanceUpdate, UserId } from '@app/medulla-common/proto/subscription.grpc';
 
 @Controller()
-export class SubscriptionController implements GrpcSubscriptionService {
+export class SubscriptionController implements GrpcSubscriptionServer {
 
   private logger: Logger
 
@@ -23,13 +23,15 @@ export class SubscriptionController implements GrpcSubscriptionService {
   }
 
   @GrpcMethod(SubscriptionServiceName)
-  checkUserBalance(userId: UserId): Promise<UserBalance> {
-    return this.subscriptionService.checkUserBalance(userId)
+  checkUserBalance(data: UserId): Promise<UserBalance> {
+    this.logger.debug("GRPC checkUserBalance controller called.", data)
+    return this.subscriptionService.checkUserBalance(data)
   }
 
   @GrpcMethod(SubscriptionServiceName)
-  updateUserBalance(userBlanceUpdate: UserBalanceUpdate): Promise<UserBalance> {
-    return this.subscriptionService.updateUserBalance(userBlanceUpdate)
+  updateUserBalance(data: UserBalanceUpdate): Promise<UserBalance> {
+    this.logger.debug("GRPC updateUserBalance controller called.", data)
+    return this.subscriptionService.updateUserBalance(data)
   }
 
   @Get()

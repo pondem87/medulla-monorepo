@@ -12,8 +12,8 @@ import { AnyActorRef, waitFor } from "xstate";
 import { LLMModelType } from "./types";
 import { LLMCallbackHandler } from "./llm-callback-handler";
 import { AIMessage, HumanMessage } from "@langchain/core/messages";
-import { SubscriptionService } from "@app/medulla-common/subscription/subscription.service";
 import { ConfigService } from "@nestjs/config";
+import { SubscriptionService } from "../subscription/subscription.service";
 
 describe('LLMProcessStateMachineProvider', () => {
 	let provider: LLMProcessStateMachineProvider;

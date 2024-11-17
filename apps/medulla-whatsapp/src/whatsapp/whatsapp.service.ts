@@ -46,6 +46,11 @@ export class WhatsappService {
     processWhatsappHookPayload(payload: WebhookPayloadDto) {
         this.logger.debug("processing WebhookPayloadDto")
 
+        if (!(payload?.object && payload.object == "whatsapp_business_account")) {
+            this.logger.error("Invalid payload:", payload)
+            throw new HttpException("Invalid payload!", HttpStatus.BAD_REQUEST)
+        }
+
         payload.entry.forEach(entry => {
 
             if (!(entry.id === this.whatsappAccountID)) {

@@ -9,6 +9,8 @@ async function bootstrap() {
   
   const config = app.get<ConfigService>(ConfigService)
 
+  const grpcUrl = `localhost:${config.get<string>("GRPC_SUBSCRIPTION_SERVICE_PORT")}`
+
   app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.GRPC,
     options: {
@@ -17,6 +19,8 @@ async function bootstrap() {
       url: `localhost:${config.get<string>("GRPC_SUBSCRIPTION_SERVICE_PORT")}`
     },
   })
+
+  console.log(`GRPC URL: ${grpcUrl}`)
 
   await app.startAllMicroservices()
   

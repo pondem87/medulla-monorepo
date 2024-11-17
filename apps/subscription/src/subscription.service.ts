@@ -26,9 +26,10 @@ export class SubscriptionService {
 
     async checkUserBalance(userId: UserId): Promise<UserBalance> {
         const user = await this.accountService.createUser(userId.userId)
+        if (user == null) return null
         return {
-            amount: user.balanceAmount,
-            multiplier: user.balanceMultiplier,
+            amount: user.balanceAmount.toString(),
+            multiplier: user.balanceMultiplier.toString(),
             currency: user.currencyIsoCode
         }
     }
@@ -37,8 +38,8 @@ export class SubscriptionService {
         const user = await this.accountService.patchUser(userBlanceUpdate)
         if (user == null) return null
         return {
-            amount: user.balanceAmount,
-            multiplier: user.balanceMultiplier,
+            amount: user.balanceAmount.toString(),
+            multiplier: user.balanceMultiplier.toString(),
             currency: user.currencyIsoCode
         }
     }

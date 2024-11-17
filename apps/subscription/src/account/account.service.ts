@@ -71,8 +71,12 @@ export class AccountService {
         try {
             // retrieve user to check currency
             const user = await this.getUser(data.userId)
-            let delta = data.delta
-            if (user.currencyIsoCode !== data.delta.currency) {
+            let num_delta = {
+                amount: BigInt(data.delta.amount),
+                multiplier: BigInt(data.delta.multiplier),
+                currency: data.delta.currency
+            }
+            if (user.currencyIsoCode !== num_delta.currency) {
                 // convert delta
                 const convFactor = (await this.currencyService.findOne(user.currencyIsoCode))?.toBaseCurrencyMultiplier
                 if (convFactor == null) {
@@ -80,13 +84,13 @@ export class AccountService {
                     return user
                 }
 
-                delta.amount = BigInt(Math.ceil(Number(delta.amount) * convFactor))
-                delta.currency = user.currencyIsoCode
+                num_delta.amount = BigInt(Math.ceil(Number(num_delta.amount) * convFactor))
+                num_delta.currency = user.currencyIsoCode
             }
 
             const newBal: Money = deductMoney(
                 { amount: user.balanceAmount, multiplier: user.balanceMultiplier },
-                { amount: delta.amount, multiplier: delta.multiplier }
+                { amount: num_delta.amount, multiplier: num_delta.multiplier }
             )
 
             if (newBal.amount < 0n) newBal.amount = 0n

@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common';
-import { LoggingService } from '@app/medulla-common/logging/logging.service';
 import { SubscriptionService } from './subscription.service';
+import { LoggingService } from '@app/medulla-common/logging/logging.service';
 import { ConfigService } from '@nestjs/config';
 import { ClientProxyFactory, Transport } from '@nestjs/microservices';
-import { SubscriptionServicePackage } from '../proto/subscription.grpc';
+import { SubscriptionServicePackage } from '@app/medulla-common/proto/subscription.grpc';
 
 @Module({
+  controllers: [],
   providers: [
     SubscriptionService,
     LoggingService,
@@ -24,6 +25,6 @@ import { SubscriptionServicePackage } from '../proto/subscription.grpc';
       inject: [ConfigService]
     }
   ],
-  exports: ["GrpcSubscriptionService"]
+  exports:["GrpcSubscriptionService"]
 })
 export class SubscriptionModule {}

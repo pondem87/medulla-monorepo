@@ -3,8 +3,8 @@ syntax = "proto3";
 package subscription;
 
 service SubscriptionService {
-    rpc CheckUserBalance(UserId) returns (UserBalance);
-    rpc UpdateUserBalance(UserBalanceUpdate) returns (UserBalance);
+    rpc CheckUserBalance (UserId) returns (UserBalance) {}
+    rpc UpdateUserBalance (UserBalanceUpdate) returns (UserBalance) {}
 }
 
 message UserId {
@@ -12,14 +12,14 @@ message UserId {
 }
 
 message UserBalance {
-    int64 amount = 1;
-    int64 multiplier = 2;
+    string amount = 1;
+    string multiplier = 2;
     string currency = 3;
 }
 
 message UserBalanceDelta {
-    int64 amount = 1;
-    int64 multiplier = 2;
+    string amount = 1;
+    string multiplier = 2;
     string currency = 3;
 }
 
