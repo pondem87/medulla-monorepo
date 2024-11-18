@@ -16,7 +16,7 @@ async function bootstrap() {
     options: {
       package: SubscriptionServicePackage,
       protoPath: config.get<string>("SUBSCRIPTION_PROTOBUF_PATH"),
-      url: `localhost:${config.get<string>("GRPC_SUBSCRIPTION_SERVICE_PORT")}`
+      url: `0.0.0.0:${config.get<string>("GRPC_SUBSCRIPTION_SERVICE_PORT")}`
     },
   })
 

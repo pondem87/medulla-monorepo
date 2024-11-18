@@ -7,12 +7,12 @@ export class LLMPrefs extends EntityCommon {
     @PrimaryColumn("varchar", {length: MAX_USER_NUMBER_LENGTH})
     userId: string
 
-    @Column("varchar", {length: 100, unique: true})
+    @Column("varchar", {length: 100})
     chatModel: string
 
-    @Column("varchar", {length: 100, unique: true})
+    @Column("varchar", {length: 100})
     imageModel: string
 
-    @Column("varchar", {length: 100, unique: true})
+    @Column("varchar", {length: 100})
     embeddingModel: string
 }
