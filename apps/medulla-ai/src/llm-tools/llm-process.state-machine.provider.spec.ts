@@ -249,8 +249,8 @@ describe('LLMProcessStateMachineProvider', () => {
 		expect(mockedSubscriptionService.updateUserBalance).toHaveBeenCalledWith({
 			userId: input.contact.wa_id,
 			delta: {
-				amount: 21_000n,
-				multiplier: 100_000_000n,
+				amount: "21000",
+				multiplier: "100000000",
 				currency: BASE_CURRENCY_ISO
 			}
 		})
@@ -326,8 +326,8 @@ describe('LLMProcessStateMachineProvider', () => {
 		expect(mockedSubscriptionService.updateUserBalance).toHaveBeenCalledWith({
 			userId: input.contact.wa_id,
 			delta: {
-				amount: 21_000n,
-				multiplier: 100_000_000n,
+				amount: "21000",
+				multiplier: "100000000",
 				currency: BASE_CURRENCY_ISO
 			}
 		})

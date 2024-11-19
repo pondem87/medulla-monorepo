@@ -23,7 +23,7 @@ export class GraphAPIService {
     async messages(messageBody: MessageBody): Promise<MessagesResponse|null> {
         try {
 
-            this.logger.debug("Sending => Message: ", messageBody)
+            this.logger.debug("Sending => Message: ", {messageBody})
 
             const response = await fetch(
                 `${this.configService.get<string>("WHATSAPP_GRAPH_API")}/${this.configService.get<string>("WHATSAPP_API_VERSION")}/${this.configService.get<string>("WHATSAPP_NUMBER_ID")}/messages`,

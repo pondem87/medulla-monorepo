@@ -14,7 +14,7 @@ export class WhatsappService {
     private whatsappAccountID: string
 
     constructor(
-        @Inject(whatsappRmqClient) 
+        @Inject(whatsappRmqClient)
         private readonly rmqClient: ClientProxy,
         private readonly loggingService: LoggingService,
         private readonly configService: ConfigService
@@ -51,43 +51,49 @@ export class WhatsappService {
             throw new HttpException("Invalid payload!", HttpStatus.BAD_REQUEST)
         }
 
-        payload.entry.forEach(entry => {
+        try {
+            payload.entry.forEach(entry => {
 
-            if (!(entry.id === this.whatsappAccountID)) {
-                this.logger.warn(`Rejected whatsapp notififaction: WhatsApp Account ID mismatch (expected: ${this.whatsappAccountID}  got: ${entry.id})`)
-                throw new HttpException("Wrong entry ID", HttpStatus.NOT_ACCEPTABLE)
-            }
-
-            entry.changes.forEach(change => {
-                if (change.field == "messages") {
-
-                    if (change.value.messages) {
-                        change.value.messages.forEach((message, index) => {
-                            this.rmqClient.emit(MessageEventPattern, {
-                                contact: change.value.contacts[index],
-                                message
-                            })
-                        })
-                    }
-
-                    if (change.value.statuses) {
-                        change.value.statuses.forEach(status => {
-                            this.logger.warn("Unhandled webhook notification", {data: status})
-                        })
-                    }
-
-                    if (change.value.errors) {
-                        change.value.errors.forEach(error => {
-                            this.logger.warn("Unhandled webhook notification", {data: error})
-                        })
-                    }
-                } else {
-                    this.logger.warn("Unhandled webhook change", {data: change})
+                if (!(entry.id === this.whatsappAccountID)) {
+                    this.logger.warn(`Rejected whatsapp notififaction: WhatsApp Account ID mismatch (expected: ${this.whatsappAccountID}  got: ${entry.id})`)
+                    throw new HttpException("Wrong entry ID", HttpStatus.NOT_ACCEPTABLE)
                 }
+
+                entry.changes.forEach(change => {
+                    if (change.field == "messages") {
+
+                        if (change.value.messages) {
+                            change.value.messages.forEach((message, index) => {
+                                this.rmqClient.emit(MessageEventPattern, {
+                                    contact: change.value.contacts[index],
+                                    message
+                                })
+                            })
+                        }
+
+                        if (change.value.statuses) {
+                            change.value.statuses.forEach(status => {
+                                this.logger.warn("Unhandled webhook notification", { data: status })
+                            })
+                        }
+
+                        if (change.value.errors) {
+                            change.value.errors.forEach(error => {
+                                this.logger.warn("Unhandled webhook notification", { data: error })
+                            })
+                        }
+                    } else {
+                        this.logger.warn("Unhandled webhook change", { data: change })
+                    }
+                })
+
             })
 
-        })
+            return "OK"
 
-        return "OK"
+        } catch (error) {
+            this.logger.error("Failed to process webhook payload:", {payload})
+            throw new HttpException("Wrong entry ID", HttpStatus.INTERNAL_SERVER_ERROR)
+        }
     }
 }

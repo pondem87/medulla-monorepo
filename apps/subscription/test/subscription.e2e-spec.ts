@@ -1,6 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import * as request from 'supertest';
 import { SubscriptionModule } from './../src/subscription.module';
 import { SubscriptionController } from '../src/subscription.controller';
 import { BASE_CURRENCY_ISO } from '../src/common/constants';
@@ -23,6 +22,8 @@ describe('SubscriptionController (e2e)', () => {
 
         subscriptionController = moduleFixture.get<SubscriptionController>(SubscriptionController)
         subsRepository = moduleFixture.get<Repository<Subscription>>(getRepositoryToken(Subscription))
+
+        await subsRepository.delete({})        
     }, 10000);
 
     it('Create new subscription and return balance', async () => {
@@ -34,16 +35,14 @@ describe('SubscriptionController (e2e)', () => {
 
         const sub = await subsRepository.findOneBy({userId: userId})
 
-        expect(bal.amount).toBe(0n)
-        expect(bal.multiplier).toEqual(100_000n)
+        expect(bal.amount.toString()).toBe("0")
+        expect(bal.multiplier.toString()).toEqual("100000")
         expect(bal.currency).toEqual(BASE_CURRENCY_ISO)
 
         subsRepository.delete({userId: userId})
     })
 
     it('Retrieve subscription and return balance', async () => {
-
-        await subsRepository.delete({})
 
         const user: Subscription = {
 			userId: "263777887788",
@@ -62,8 +61,8 @@ describe('SubscriptionController (e2e)', () => {
 
         const bal = await subscriptionController.checkUserBalance({userId: user.userId})
 
-        expect(bal.amount.toString()).toEqual(user.balanceAmount.toString())
-        expect(bal.multiplier.toString()).toEqual(user.balanceMultiplier.toString())
+        expect(bal.amount).toEqual(user.balanceAmount.toString())
+        expect(bal.multiplier).toEqual(user.balanceMultiplier.toString())
         expect(bal.currency).toEqual(user.currencyIsoCode)
 
         await subsRepository.delete({userId: user.userId})

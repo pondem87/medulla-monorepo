@@ -92,8 +92,8 @@ describe('AccountService', () => {
 		const sub = await service.patchUser({
 			userId: user.userId,
 			delta: {
-				amount: 150n,
-				multiplier: 100_000_000n,
+				amount: "150",
+				multiplier: "100000000",
 				currency: "USD"
 			}
 		})
@@ -130,8 +130,8 @@ describe('AccountService', () => {
 		const sub = await service.patchUser({
 			userId: user.userId,
 			delta: {
-				amount: 150n,
-				multiplier: 100_000_000n,
+				amount: "150",
+				multiplier: "100000000",
 				currency: "USD"
 			}
 		})
@@ -159,8 +159,8 @@ describe('AccountService', () => {
 		const sub = await service.patchUser({
 			userId: user.userId,
 			delta: {
-				amount: 150n,
-				multiplier: 100_000_000n,
+				amount: "150",
+				multiplier: "100000000",
 				currency: "USD"
 			}
 		})

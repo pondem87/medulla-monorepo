@@ -11,7 +11,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { LLMModelType } from '../src/llm-tools/types';
 import { ChatHistory } from '../src/llm-tools/entities/chat-history.entity';
 import { ChatMessage } from '../src/llm-tools/entities/chat-message.entity';
-import { SubscriptionService } from '@app/medulla-common/subscription/subscription.service';
+import { SubscriptionService } from '../src/subscription/subscription.service';
 
 describe('MedullaAiController (e2e)', () => {
     let app: INestApplication;
@@ -27,8 +27,9 @@ describe('MedullaAiController (e2e)', () => {
     let chatMessageRepo: Repository<ChatMessage>
     let modelId: string
     const mockUserId = "777888999"
+    const mockUserId1 = "777888777"
 
-    
+
     beforeEach(async () => {
         const moduleFixture: TestingModule = await Test.createTestingModule({
             imports: [MedullaAiModule]
@@ -49,6 +50,13 @@ describe('MedullaAiController (e2e)', () => {
         // Spy on emit
         emitMessageSpy = jest.spyOn(testRmqClient, 'emit');
 
+        // cleanup
+        await llmModelRepo.delete({})
+        await llmPrefsRepo.delete({})
+        await chatHistoryRepo.delete({})
+        await llmPrefsRepo.delete({})
+        await chatHistoryRepo.delete({})
+
     }, 25000);
 
     it('should process message', async () => {
@@ -65,33 +73,33 @@ describe('MedullaAiController (e2e)', () => {
         )).id
 
         const input = {
-			contact: {
-				profile: {
-					name: "some-guy"
-				},
-				wa_id: mockUserId
-			},
-			prompt: "some-guy's prompt",
-			ragMode: false
-		}
+            contact: {
+                profile: {
+                    name: "some-guy"
+                },
+                wa_id: mockUserId
+            },
+            prompt: "some-guy's prompt",
+            ragMode: false
+        }
 
         // spy on subscription
         checkUserBalanceSpy = jest.spyOn(subscriptionService, 'checkUserBalance').mockResolvedValue({
-            amount: 100n,
-            multiplier: 100n,
+            amount: "100",
+            multiplier: "100",
             currency: "USD"
         })
 
         updateUserBalanceSpy = jest.spyOn(subscriptionService, 'updateUserBalance').mockResolvedValue({
-            amount: 99_979_000n,
-            multiplier: 100_000_000n,
+            amount: "9979000",
+            multiplier: "100000000",
             currency: "USD"
         })
 
         const res = await llmToolsController.processPayload(input)
 
-        let chatHis = await chatHistoryRepo.findOneBy({userId: mockUserId})
-        let chatMsgs = await chatMessageRepo.find({ where: {chatHistory: { userId: mockUserId}}, order: {createdAt: "DESC"}})
+        let chatHis = await chatHistoryRepo.findOneBy({ userId: mockUserId })
+        let chatMsgs = await chatMessageRepo.find({ where: { chatHistory: { userId: mockUserId } }, order: { createdAt: "DESC" } })
 
         expect(emitMessageSpy).toHaveBeenCalledTimes(1)
         expect(chatHis.userId).toBe(mockUserId)
@@ -100,17 +108,94 @@ describe('MedullaAiController (e2e)', () => {
         expect(res).toBe(true)
 
         // cleanup database
-        await llmModelRepo.delete({id: modelId})
-        await llmPrefsRepo.delete({userId: mockUserId})
-        await chatHistoryRepo.delete({userId: mockUserId})
+        await llmModelRepo.delete({ id: modelId })
+        await llmPrefsRepo.delete({ userId: mockUserId })
+        await chatHistoryRepo.delete({ userId: mockUserId })
     }, 15000);
+
+    it('should process message from 2 users', async () => {
+
+        // default chat model
+        modelId = (await llmModelRepo.save(
+            llmModelRepo.create({
+                name: "gpt-4o-mini",
+                type: LLMModelType.CHAT,
+                costPerInputToken: 15n,
+                costPerOutputToken: 60n,
+                costMultiplier: 100_000_000n
+            })
+        )).id
+
+        const input = [
+            {
+                contact: {
+                    profile: {
+                        name: "some-guy-1"
+                    },
+                    wa_id: mockUserId
+                },
+                prompt: "some-guy-1's prompt",
+                ragMode: false
+            },
+            {
+                contact: {
+                    profile: {
+                        name: "some-guy-2"
+                    },
+                    wa_id: mockUserId1
+                },
+                prompt: "some-guy-2's prompt",
+                ragMode: false
+            }
+        ]
+
+        // spy on subscription
+        checkUserBalanceSpy = jest.spyOn(subscriptionService, 'checkUserBalance').mockResolvedValue({
+            amount: "100",
+            multiplier: "100",
+            currency: "USD"
+        })
+
+        updateUserBalanceSpy = jest.spyOn(subscriptionService, 'updateUserBalance').mockResolvedValue({
+            amount: "99979000",
+            multiplier: "100000000",
+            currency: "USD"
+        })
+
+        const res = await llmToolsController.processPayload(input[0])
+        const res1 = await llmToolsController.processPayload(input[1])
+
+        let chatHis = await chatHistoryRepo.findOneBy({ userId: mockUserId })
+        let chatMsgs = await chatMessageRepo.find({ where: { chatHistory: { userId: mockUserId } }, order: { createdAt: "DESC" } })
+        let chatHis1 = await chatHistoryRepo.findOneBy({ userId: mockUserId1 })
+        let chatMsgs1 = await chatMessageRepo.find({ where: { chatHistory: { userId: mockUserId1 } }, order: { createdAt: "DESC" } })
+        let llmPrefs = await llmPrefsRepo.find({})
+
+        expect(llmPrefs.length).toBe(2)
+        expect(emitMessageSpy).toHaveBeenCalledTimes(2)
+        expect(chatHis.userId).toBe(mockUserId)
+        expect(chatHis1.userId).toBe(mockUserId1)
+        expect(emitMessageSpy).toHaveBeenNthCalledWith(1, MessengerEventPattern, { contact: input[0].contact, text: chatMsgs[0].message.data.content, type: "text", conversationType: "service" })
+        expect(emitMessageSpy).toHaveBeenNthCalledWith(2, MessengerEventPattern, { contact: input[1].contact, text: chatMsgs1[0].message.data.content, type: "text", conversationType: "service" })
+        expect(chatMsgs[0].message.type).toEqual("ai")
+        expect(chatMsgs1[0].message.type).toEqual("ai")
+        expect(res).toBe(true)
+        expect(res1).toBe(true)
+
+        // cleanup database
+        await llmModelRepo.delete({ id: modelId })
+        await llmPrefsRepo.delete({ userId: mockUserId })
+        await chatHistoryRepo.delete({ userId: mockUserId })
+        await llmPrefsRepo.delete({ userId: mockUserId1 })
+        await chatHistoryRepo.delete({ userId: mockUserId1 })
+    }, 20000);
 
     it('should catch low balance', async () => {
 
         // preclean database
-        await llmModelRepo.delete({name: "gpt-4o-mini"})
-        await llmPrefsRepo.delete({userId: mockUserId})
-        await chatHistoryRepo.delete({userId: mockUserId})
+        await llmModelRepo.delete({ name: "gpt-4o-mini" })
+        await llmPrefsRepo.delete({ userId: mockUserId })
+        await chatHistoryRepo.delete({ userId: mockUserId })
 
         // default chat model
         modelId = (await llmModelRepo.save(
@@ -124,33 +209,33 @@ describe('MedullaAiController (e2e)', () => {
         )).id
 
         const input = {
-			contact: {
-				profile: {
-					name: "some-guy"
-				},
-				wa_id: mockUserId
-			},
-			prompt: "some-guy's prompt",
-			ragMode: false
-		}
+            contact: {
+                profile: {
+                    name: "some-guy"
+                },
+                wa_id: mockUserId
+            },
+            prompt: "some-guy's prompt",
+            ragMode: false
+        }
 
         // spy on subscription
         checkUserBalanceSpy = jest.spyOn(subscriptionService, 'checkUserBalance').mockResolvedValue({
-            amount: 0n,
-            multiplier: 100n,
+            amount: "0",
+            multiplier: "100",
             currency: "USD"
         })
 
         updateUserBalanceSpy = jest.spyOn(subscriptionService, 'updateUserBalance').mockResolvedValue({
-            amount: 99_979_000n,
-            multiplier: 100_000_000n,
+            amount: "99979000",
+            multiplier: "100000000",
             currency: "USD"
         })
 
         const res = await llmToolsController.processPayload(input)
 
-        let chatHis = await chatHistoryRepo.findOneBy({userId: mockUserId})
-        let chatMsgs = await chatMessageRepo.find({ where: {chatHistory: { userId: mockUserId}}, order: {createdAt: "DESC"}})
+        let chatHis = await chatHistoryRepo.findOneBy({ userId: mockUserId })
+        let chatMsgs = await chatMessageRepo.find({ where: { chatHistory: { userId: mockUserId } }, order: { createdAt: "DESC" } })
 
         expect(emitMessageSpy).toHaveBeenCalledTimes(1)
         expect(chatHis.userId).toBe(mockUserId)
@@ -159,8 +244,8 @@ describe('MedullaAiController (e2e)', () => {
         expect(res).toBe(true)
 
         // cleanup database
-        await llmModelRepo.delete({id: modelId})
-        await llmPrefsRepo.delete({userId: mockUserId})
-        await chatHistoryRepo.delete({userId: mockUserId})
+        await llmModelRepo.delete({ id: modelId })
+        await llmPrefsRepo.delete({ userId: mockUserId })
+        await chatHistoryRepo.delete({ userId: mockUserId })
     }, 15000);
 });
