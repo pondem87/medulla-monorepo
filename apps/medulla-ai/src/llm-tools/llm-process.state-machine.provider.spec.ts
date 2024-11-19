@@ -274,7 +274,7 @@ describe('LLMProcessStateMachineProvider', () => {
 	})
 
 
-	it('should call llm and update balance with balance when CHARGE_LLM_SERVICE is false', async () => {
+	it('should call llm and not update balance when CHARGE_LLM_SERVICE is false', async () => {
 		const input = {
 			contact: {
 				profile: {
@@ -322,22 +322,10 @@ describe('LLMProcessStateMachineProvider', () => {
 
 		expect(llmProcessActor.getSnapshot().matches("Complete")).toBe(true)
 		expect(mockInvokeGraph).toHaveBeenCalledTimes(1)
+
 		// confirm calculated usage value
-		expect(mockedSubscriptionService.updateUserBalance).toHaveBeenCalledWith({
-			userId: input.contact.wa_id,
-			delta: {
-				amount: "21000",
-				multiplier: "100000000",
-				currency: BASE_CURRENCY_ISO
-			}
-		})
-		expect(llmProcessActor.getSnapshot().context.userBalance).toEqual({
-			amount: {
-				amount: 0n,
-				multiplier: 100_000_000n
-			},
-			currency: "USD"
-		})
+		expect(mockedSubscriptionService.updateUserBalance).toHaveBeenCalledTimes(0)
+		expect(llmProcessActor.getSnapshot().context.userBalance.amount.amount.toString()).toEqual("0")
 		expect(mockedSubscriptionService.checkUserBalance).toHaveBeenCalledWith({ userId: input.contact.wa_id })
 		expect(mockLLMModelService.getModel).toHaveBeenCalledWith("gpt-4o-mini")
 		expect(mockedLLMPrefsService.getPrefs).toHaveBeenCalledWith(input.contact.wa_id)
