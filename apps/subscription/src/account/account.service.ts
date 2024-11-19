@@ -89,7 +89,7 @@ export class AccountService {
             }
 
             const newBal: Money = deductMoney(
-                { amount: user.balanceAmount, multiplier: user.balanceMultiplier },
+                { amount: BigInt(user.balanceAmount), multiplier: BigInt(user.balanceMultiplier) },
                 { amount: num_delta.amount, multiplier: num_delta.multiplier }
             )
 

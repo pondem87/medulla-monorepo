@@ -49,7 +49,7 @@ export class LLMProcessStateMachineProvider {
 
     checkUserBalance = async ({ input }: { input: { userId: string } }) => {
         const { amount, multiplier, currency } = await this.subscriptionService.checkUserBalance(input)
-        this.logger.debug("Checked user balance.", {amount: BigInt(amount), multiplier: BigInt(multiplier), currency})
+        this.logger.debug("Checked user balance.", { amount: BigInt(amount), multiplier: BigInt(multiplier), currency })
         return { amount: BigInt(amount), multiplier: BigInt(multiplier), currency }
     }
 
@@ -104,27 +104,39 @@ export class LLMProcessStateMachineProvider {
         const model = await this.llmModelService.getModel(input.context.textModelName)
 
         // calculate usage cost
-        const inputTokenCost = getTotalCost(usage.inputTokens, {
-            amount: BigInt(model.costPerInputToken),
-            multiplier: BigInt(model.costMultiplier)
-        })
-        const outputTokenCost = getTotalCost(usage.outputTokens, {
-            amount: BigInt(model.costPerOutputToken),
-            multiplier: BigInt(model.costMultiplier)
-        })
-        const totalCost = addMoney(inputTokenCost, outputTokenCost)
+        const chargeLLMService: boolean = this.configService.get<string>("CHARGE_LLM_SERVICE") == "false" ? false : true
 
-        if (totalCost.amount > 0) {
-            const newBalance = await this.subscriptionService.updateUserBalance({
-                userId: input.context.contact.wa_id,
-                delta: {
-                    amount: totalCost.amount.toString(),
-                    multiplier: totalCost.multiplier.toString(),
-                    currency: BASE_CURRENCY_ISO
-                }
+        if (chargeLLMService) {
+            const inputTokenCost = getTotalCost(usage.inputTokens, {
+                amount: BigInt(model.costPerInputToken),
+                multiplier: BigInt(model.costMultiplier)
             })
+            const outputTokenCost = getTotalCost(usage.outputTokens, {
+                amount: BigInt(model.costPerOutputToken),
+                multiplier: BigInt(model.costMultiplier)
+            })
+            const totalCost = addMoney(inputTokenCost, outputTokenCost)
 
-            return newBalance
+            if (totalCost.amount > 0) {
+                const newBalance = await this.subscriptionService.updateUserBalance({
+                    userId: input.context.contact.wa_id,
+                    delta: {
+                        amount: totalCost.amount.toString(),
+                        multiplier: totalCost.multiplier.toString(),
+                        currency: BASE_CURRENCY_ISO
+                    }
+                })
+
+                this.logger.debug("Updated balance: ", { balance: newBalance })
+
+                return newBalance
+            } else {
+                return {
+                    amount: input.context.userBalance?.amount.amount,
+                    multiplier: input.context.userBalance?.amount.multiplier,
+                    currency: input.context.userBalance?.currency
+                }
+            }
         } else {
             return {
                 amount: input.context.userBalance?.amount.amount,
@@ -132,6 +144,7 @@ export class LLMProcessStateMachineProvider {
                 currency: input.context.userBalance?.currency
             }
         }
+
     }
 
     private setUpStateMachine() {

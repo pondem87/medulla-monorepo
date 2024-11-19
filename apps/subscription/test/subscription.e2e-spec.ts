@@ -6,11 +6,14 @@ import { BASE_CURRENCY_ISO } from '../src/common/constants';
 import { Repository } from 'typeorm';
 import { Subscription } from '../src/account/entities/subscription.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { UserBalanceUpdate } from '@app/medulla-common/proto/subscription.grpc';
+import { Currency } from '../src/currency/entities/currency.entity';
 
 describe('SubscriptionController (e2e)', () => {
     let app: INestApplication;
     let subscriptionController: SubscriptionController
     let subsRepository: Repository<Subscription>
+    let currencyRepository: Repository<Currency>
 
     beforeEach(async () => {
         const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -22,6 +25,7 @@ describe('SubscriptionController (e2e)', () => {
 
         subscriptionController = moduleFixture.get<SubscriptionController>(SubscriptionController)
         subsRepository = moduleFixture.get<Repository<Subscription>>(getRepositoryToken(Subscription))
+        currencyRepository = moduleFixture.get<Repository<Currency>>(getRepositoryToken(Currency))
 
         await subsRepository.delete({})        
     }, 10000);
@@ -63,6 +67,50 @@ describe('SubscriptionController (e2e)', () => {
 
         expect(bal.amount).toEqual(user.balanceAmount.toString())
         expect(bal.multiplier).toEqual(user.balanceMultiplier.toString())
+        expect(bal.currency).toEqual(user.currencyIsoCode)
+
+        await subsRepository.delete({userId: user.userId})
+    })
+
+    it('Update and return balance', async () => {
+
+        const user: Subscription = {
+			userId: "263777887788",
+			currencyIsoCode: "BWP",
+			balanceAmount: 100_000n,
+			balanceMultiplier: 100_000n,
+			createdAt: new Date(),
+			updatedAt: new Date()
+		}
+
+        await subsRepository.save(subsRepository.create(user))
+
+        // make sure Pula currency is available
+        let pula = await currencyRepository.findOneBy({isoCode: "BWP"})
+        if (pula) {
+            // if pula exists update rate
+            await currencyRepository.update({isoCode: "BWP"}, {toBaseCurrencyMultiplier: 13.71})
+        } else {
+            await currencyRepository.save(currencyRepository.create({
+                name: "Botswana Pula",
+                isoCode: "BWP",
+                toBaseCurrencyMultiplier: 13.71
+            }))
+        }
+
+        const userBalanceUpdate: UserBalanceUpdate = {
+            userId: user.userId,
+            delta: {
+                amount: "1630",
+                multiplier: "100000000",
+                currency: "USD"
+            }
+        }
+
+        const bal = await subscriptionController.updateUserBalance(userBalanceUpdate)
+
+        expect(bal.amount).toEqual("99977652")
+        expect(bal.multiplier).toEqual("100000000")
         expect(bal.currency).toEqual(user.currencyIsoCode)
 
         await subsRepository.delete({userId: user.userId})
