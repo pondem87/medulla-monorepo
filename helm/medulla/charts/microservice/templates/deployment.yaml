@@ -20,6 +20,7 @@ spec:
       containers:
       - name: {{ .app_name }}-container
         image: {{ .image.repo }}:{{ .image.tag }}
+        imagePullPolicy: Always
 
         ports:
         {{- range .ports }}

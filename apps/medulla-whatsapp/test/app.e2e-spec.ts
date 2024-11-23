@@ -13,7 +13,7 @@ describe('MedullaWhatsappController (e2e)', () => {
 
     app = moduleFixture.createNestApplication();
     await app.init();
-  }, 10000);
+  }, 15000);
 
   it('/ (GET): Health check', () => {
     return request(app.getHttpServer())

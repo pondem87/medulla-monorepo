@@ -37,6 +37,11 @@ describe('WhatsappMessenger (e2e)', () => {
 
     }, 20000);
 
+    beforeEach(async () => {
+        await sentMessageRepository.delete({})
+        await conversationRepository.delete({})
+    })
+
     it("should send LLM text response to user", async () => {
 
         const payload: MessengerRMQMessage = {
@@ -109,5 +114,103 @@ describe('WhatsappMessenger (e2e)', () => {
         await conversationRepository.delete({userId: payload.contact.wa_id})
 
     }, 20000)
+
+    it("it should reuse unexpired conversation", async () => {
+        const wa_id = "223456789"
+        const payload: MessengerRMQMessage = {
+            contact: {
+                profile: {
+                    name: "user-name"
+                },
+                wa_id: wa_id
+            },
+            type: "text",
+            text: "this is the llm text output",
+            conversationType: "service"
+        }
+
+        fetchSpy = jest.spyOn(global, 'fetch').mockResolvedValue({
+            ok: true,
+            json: jest.fn().mockResolvedValue({
+                messaging_product: "whatsapp",
+                contacts: [
+                    {
+                        input: payload.contact.wa_id,
+                        wa_id: payload.contact.wa_id
+                    }
+                ],
+                messages: [
+                    {
+                        id: "sent-message-id",
+                        message_status: "accepted",
+                    }
+                ]
+            })
+        } as unknown as Response)
+
+        const res1 = await whatsappMessengerController.prepareAndSendMessage(payload)
+        const res2 = await whatsappMessengerController.prepareAndSendMessage(payload)
+
+        const conv = await conversationRepository.findBy({userId: wa_id})
+        const msgs = await sentMessageRepository.findBy({userId: wa_id})
+
+        expect(conv.length).toBe(1)
+        expect(msgs.length).toBe(2)
+
+        // detele staff
+        await sentMessageRepository.delete({userId: payload.contact.wa_id})
+        await conversationRepository.delete({userId: payload.contact.wa_id})
+    }, 15000)
+
+    it("it should create new for expired conversation", async () => {
+        const wa_id = "223356789"
+        const payload: MessengerRMQMessage = {
+            contact: {
+                profile: {
+                    name: "user-name"
+                },
+                wa_id: wa_id
+            },
+            type: "text",
+            text: "this is the llm text output",
+            conversationType: "service"
+        }
+
+        fetchSpy = jest.spyOn(global, 'fetch').mockResolvedValue({
+            ok: true,
+            json: jest.fn().mockResolvedValue({
+                messaging_product: "whatsapp",
+                contacts: [
+                    {
+                        input: payload.contact.wa_id,
+                        wa_id: payload.contact.wa_id
+                    }
+                ],
+                messages: [
+                    {
+                        id: "sent-message-id",
+                        message_status: "accepted",
+                    }
+                ]
+            })
+        } as unknown as Response)
+
+        const res1 = await whatsappMessengerController.prepareAndSendMessage(payload)
+
+        // force conv expiry :-D
+        await conversationRepository.update({userId: wa_id}, {expiry: new Date(new Date().setHours(new Date().getHours() - 27))})
+
+        const res2 = await whatsappMessengerController.prepareAndSendMessage(payload)
+
+        const conv = await conversationRepository.findBy({userId: wa_id})
+        const msgs = await sentMessageRepository.findBy({userId: wa_id})
+
+        expect(conv.length).toBe(2)
+        expect(msgs.length).toBe(2)
+
+        // detele staff
+        await sentMessageRepository.delete({userId: payload.contact.wa_id})
+        await conversationRepository.delete({userId: payload.contact.wa_id})
+    }, 15000)
 
 });

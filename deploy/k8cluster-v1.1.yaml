@@ -1,0 +1,32 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: pfitz-kube-1
+  region: eu-west-2
+  version: "1.30"
+
+iam:
+  withOIDC: true
+  serviceAccounts:
+  - metadata:
+      name: aws-load-balancer-controller
+      namespace: kube-system
+    attachPolicyARNs:
+    - arn:aws:iam::533267159380:policy/AWSLoadBalancerControllerIAMPolicy
+  - metadata:
+      name: aws-load-balancer-controller
+      namespace: kube-system
+    attachPolicyARNs:
+    - arn:aws:iam::533267159380:policy/AWSLoadBalancerControllerIAMPolicy
+
+nodeGroups:
+- name: group-1.1
+  instanceType: t3a.small
+  desiredCapacity: 2
+  minSize: 2
+  maxSize: 5
+  privateNetworking: true
+  iam:
+      withAddonPolicies:
+        autoScaler: true
