@@ -197,7 +197,7 @@ describe('WhatsappMessenger (e2e)', () => {
         const res1 = await whatsappMessengerController.prepareAndSendMessage(payload)
 
         // force conv expiry :-D
-        await conversationRepository.update({userId: wa_id}, {expiry: new Date(new Date().setHours(new Date().getHours() - 27))})
+        await conversationRepository.update({userId: wa_id}, {expiry: new Date(new Date().setHours(new Date().getHours() - 1))})
 
         const res2 = await whatsappMessengerController.prepareAndSendMessage(payload)
 

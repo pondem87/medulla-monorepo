@@ -42,7 +42,8 @@ export class MetricsService {
         try {
             const convs = await this.conversationRepository.find({
                 where: {
-                    expiry: MoreThan(new Date(new Date().setHours(new Date().getHours() - 24)))
+                    userId: userId,
+                    expiry: MoreThan(new Date())
                 },
                 order: {
                     expiry: "DESC"
@@ -52,7 +53,8 @@ export class MetricsService {
             if (convs.length > 0) return convs[0]
             else return null
         } catch (error) {
-            
+            this.logger.error("Error occurred while fetching converstion.", error)
+            return null
         }
     }
 

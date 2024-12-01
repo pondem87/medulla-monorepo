@@ -120,22 +120,32 @@ export class MessengerProcessStateMachineProvider {
         return createActor(this.MessengerProcessStateMachine, { input }) as StateMachineActor<MPSMEventType, MPSMContext>
     }
 
-    prepareMessage(input: { context: MPSMContext; }): MessageBody {
+    prepareMessage(input: { context: MPSMContext; }): MessageBody[] {
 
         const context = input.context
 
         switch (context.payload.type) {
             case "text":
 
-                const msgBody: TextMessageBody = {
-                    messaging_product: "whatsapp",
-                    recipient_type: "individual",
-                    to: context.payload.contact.wa_id,
-                    type: "text",
-                    text: {
-                        body: context.payload.text,
-                        preview_url: true
-                    }
+                let msgBody: TextMessageBody[] = []
+
+                const maxMsgChars = 4096
+
+                const numberOfChunks = Math.ceil(context.payload.text?.length / maxMsgChars)
+
+                for (let i = 0; i < numberOfChunks; i++) {
+                    const start = i * maxMsgChars;
+                    const end = start + maxMsgChars;
+                    msgBody.push({
+                        messaging_product: "whatsapp",
+                        recipient_type: "individual",
+                        to: context.payload.contact.wa_id,
+                        type: "text",
+                        text: {
+                            body: context.payload.text?.slice(start, end),
+                            preview_url: true
+                        }
+                    })
                 }
 
                 return msgBody
@@ -160,20 +170,23 @@ export class MessengerProcessStateMachineProvider {
 
     async sendMessage(input: { context: MPSMContext; }): Promise<boolean> {
 
-        const response = await this.graphApiService.messages(input.context.messageBody)
+        for (const body of input.context.messageBody) {
+            const response = await this.graphApiService.messages(body)
 
-        if (response !== null) {
-            await this.metricsService.createSentMessage(
-                input.context.messageBody.to,
-                response.messages[0].id,
-                JSON.stringify(input.context.messageBody),
-                input.context.conversation
-            )
-
-            return true
+            if (response !== null) {
+                await this.metricsService.createSentMessage(
+                    body.to,
+                    response.messages[0].id,
+                    JSON.stringify(body),
+                    input.context.conversation
+                )
+            } else {
+                return false
+            }
         }
 
-        return false
+        return true
+
     }
 }
 
@@ -181,7 +194,7 @@ export type MPSMEventType = { type: string }
 
 export type MPSMContext = {
     payload: MessengerRMQMessage,
-    messageBody?: MessageBody,
+    messageBody?: MessageBody[],
     conversation?: Conversation,
     error?: any
 }

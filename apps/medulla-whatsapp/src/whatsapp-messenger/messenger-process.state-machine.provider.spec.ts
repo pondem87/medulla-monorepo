@@ -95,7 +95,8 @@ describe('MessengerProcessStateMachineProvider', () => {
             sentMessages: [],
             expiry: new Date(),
             createdAt: new Date(),
-            updatedAt: new Date()
+            updatedAt: new Date(),
+            setExpiry: null
         }
 
         mockMetricsService.findValidConversation = jest.fn().mockResolvedValue(conv)
@@ -113,13 +114,13 @@ describe('MessengerProcessStateMachineProvider', () => {
         console.log(actor.getSnapshot().context.error)
 
         expect(actor.getSnapshot().matches("Complete")).toBe(true)
-        expect(actor.getSnapshot().context.messageBody.to).toBe(payload.contact.wa_id)
-        expect(mockGraphApi.messages).toHaveBeenCalledWith(actor.getSnapshot().context.messageBody)
+        expect(actor.getSnapshot().context.messageBody[0].to).toBe(payload.contact.wa_id)
+        expect(mockGraphApi.messages).toHaveBeenCalledWith(actor.getSnapshot().context.messageBody[0])
         expect(mockMetricsService.createSentMessage).toHaveBeenCalledTimes(1)
         expect(mockMetricsService.createSentMessage).toHaveBeenCalledWith(
-            actor.getSnapshot().context.messageBody.to,
+            actor.getSnapshot().context.messageBody[0].to,
             "some-id",
-            JSON.stringify(actor.getSnapshot().context.messageBody),
+            JSON.stringify(actor.getSnapshot().context.messageBody[0]),
             conv
         )
     })

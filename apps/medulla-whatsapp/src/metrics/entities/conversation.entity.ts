@@ -19,6 +19,6 @@ export class Conversation extends EntityCommon {
 
     @BeforeInsert()
     setExpiry() {
-        this.expiry = new Date()
+        this.expiry = new Date(new Date().setHours(new Date().getHours() + 24))
     }
 }
