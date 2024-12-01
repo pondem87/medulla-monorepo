@@ -3,7 +3,6 @@ import { Repository } from "typeorm";
 import { SentMessage } from "../src/metrics/entities/sent-message.entity";
 import { Conversation } from "../src/metrics/entities/conversation.entity";
 import { Test, TestingModule } from "@nestjs/testing";
-import { WhatsappMessengerModule } from "../src/whatsapp-messenger/whatsapp-messenger.module";
 import { WhatsappMessengerController } from "../src/whatsapp-messenger/whatsapp-messenger.controller";
 import { getRepositoryToken } from "@nestjs/typeorm";
 import { MessengerRMQMessage } from "../src/whatsapp-messenger/dto/messenger-rmq-message.dto";
