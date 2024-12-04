@@ -7,6 +7,6 @@
     "^.+\\.(t|j)s$": "ts-jest"
   },
   "moduleNameMapper": {
-    "^@app/medulla-common(.*)$": "D:/PROJECTS/Projects 2024/medulla/libs/medulla-common/src$1"
+    "^@app/medulla-common(.*)$": "/home/medulla/libs/medulla-common/src$1"
   }
 }

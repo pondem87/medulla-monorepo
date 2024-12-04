@@ -12,7 +12,7 @@ import { SubscriptionModule } from './subscription/subscription.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true, envFilePath: [".env", "./env/medulla-ai/.env"]}),
+    ConfigModule.forRoot({ isGlobal: true, envFilePath: [".env"]}),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (config: ConfigService) => ({

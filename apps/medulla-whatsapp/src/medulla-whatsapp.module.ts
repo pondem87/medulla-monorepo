@@ -13,7 +13,7 @@ import * as fs from 'fs';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true, envFilePath: [".env", "./env/medulla-whatsapp/.env"] }),
+    ConfigModule.forRoot({ isGlobal: true, envFilePath: [".env"] }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (config: ConfigService) => ({
