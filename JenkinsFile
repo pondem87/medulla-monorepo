@@ -1,0 +1,11 @@
+pipeline {
+    agent any
+    stages {
+        stage("get_dependancies") {
+            steps {
+                echo "install dependencies"
+                sh "npm install"
+            }
+        }
+    }
+}
