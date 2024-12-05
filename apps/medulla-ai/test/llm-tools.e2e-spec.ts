@@ -12,6 +12,7 @@ import { LLMModelType } from '../src/llm-tools/types';
 import { ChatHistory } from '../src/llm-tools/entities/chat-history.entity';
 import { ChatMessage } from '../src/llm-tools/entities/chat-message.entity';
 import { SubscriptionService } from '../src/subscription/subscription.service';
+import { LONG_TEST_TIMEOUT } from '@app/medulla-common/common/constants';
 
 describe('MedullaAiController (e2e)', () => {
     let app: INestApplication;
@@ -57,7 +58,7 @@ describe('MedullaAiController (e2e)', () => {
         await llmPrefsRepo.delete({})
         await chatHistoryRepo.delete({})
 
-    }, 25000);
+    }, LONG_TEST_TIMEOUT);
 
     it('should process message', async () => {
 
@@ -111,7 +112,7 @@ describe('MedullaAiController (e2e)', () => {
         await llmModelRepo.delete({ id: modelId })
         await llmPrefsRepo.delete({ userId: mockUserId })
         await chatHistoryRepo.delete({ userId: mockUserId })
-    }, 15000);
+    }, LONG_TEST_TIMEOUT);
 
     it('should process message from 2 users', async () => {
 
@@ -188,7 +189,7 @@ describe('MedullaAiController (e2e)', () => {
         await chatHistoryRepo.delete({ userId: mockUserId })
         await llmPrefsRepo.delete({ userId: mockUserId1 })
         await chatHistoryRepo.delete({ userId: mockUserId1 })
-    }, 20000);
+    }, LONG_TEST_TIMEOUT);
 
     it('should catch low balance', async () => {
 
@@ -247,5 +248,5 @@ describe('MedullaAiController (e2e)', () => {
         await llmModelRepo.delete({ id: modelId })
         await llmPrefsRepo.delete({ userId: mockUserId })
         await chatHistoryRepo.delete({ userId: mockUserId })
-    }, 15000);
+    }, LONG_TEST_TIMEOUT);
 });

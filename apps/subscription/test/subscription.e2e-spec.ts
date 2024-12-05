@@ -8,6 +8,7 @@ import { Subscription } from '../src/account/entities/subscription.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { UserBalanceUpdate } from '@app/medulla-common/proto/subscription.grpc';
 import { Currency } from '../src/currency/entities/currency.entity';
+import { LONG_TEST_TIMEOUT } from '@app/medulla-common/common/constants';
 
 describe('SubscriptionController (e2e)', () => {
     let app: INestApplication;
@@ -28,7 +29,7 @@ describe('SubscriptionController (e2e)', () => {
         currencyRepository = moduleFixture.get<Repository<Currency>>(getRepositoryToken(Currency))
 
         await subsRepository.delete({})        
-    }, 10000);
+    }, LONG_TEST_TIMEOUT);
 
     it('Create new subscription and return balance', async () => {
 
@@ -44,7 +45,7 @@ describe('SubscriptionController (e2e)', () => {
         expect(bal.currency).toEqual(BASE_CURRENCY_ISO)
 
         subsRepository.delete({userId: userId})
-    })
+    }, LONG_TEST_TIMEOUT)
 
     it('Retrieve subscription and return balance', async () => {
 
@@ -70,7 +71,7 @@ describe('SubscriptionController (e2e)', () => {
         expect(bal.currency).toEqual(user.currencyIsoCode)
 
         await subsRepository.delete({userId: user.userId})
-    })
+    }, LONG_TEST_TIMEOUT)
 
     it('Update and return balance', async () => {
 
@@ -114,5 +115,5 @@ describe('SubscriptionController (e2e)', () => {
         expect(bal.currency).toEqual(user.currencyIsoCode)
 
         await subsRepository.delete({userId: user.userId})
-    })
+    }, LONG_TEST_TIMEOUT)
 });

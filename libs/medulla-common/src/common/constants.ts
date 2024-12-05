@@ -1,3 +1,5 @@
 export const UUID_LENGTH=36
 export const MAX_USER_NUMBER_LENGTH=20
 export const DEFAULT_MONEY_MULTIPLIER=1_00_000_000n
+export const LONG_TEST_TIMEOUT = 45000;
+export const SHORT_TEST_TIMEOUT = 10000;
