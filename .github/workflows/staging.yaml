@@ -9,17 +9,31 @@ jobs:
   test-and-build:
     name: Test and build Medulla apps
     runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
+      AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+      AWS_DEFAULT_REGION: us-west-2
+
     steps:
       - name: Checkout code
         uses: actions/Checkout@v3
 
-      - name: Setup Node v20.17 environment
+      - name: Setup Node v20.18.0 environment
         uses: actions/setup-node@v4
         with:
           node-version: '20.18.0'
 
       - name: Install dependencies
         run: npm install
+
+      - name: Install aws-cli
+        run: |
+          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+          unzip awscliv2.zip
+          sudo ./aws/install
+
+      - name: Get environment variables from S3
+        run: aws s3 cp s3://pfitz-configs/medulla/staging/.env .
 
       - name: Unit Testing
         run: npm run test
