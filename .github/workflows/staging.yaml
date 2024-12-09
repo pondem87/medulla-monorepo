@@ -35,9 +35,9 @@ jobs:
 
       - name: E2E Testing
         run: |
-          npm run test:e2e:medulla-ai --forceExit
-          npm run test:e2e:medulla-whatsapp --forceExit
-          npm run test:e2e:subscription --forceExit
+          npm run test:e2e:medulla-ai -- --forceExit
+          npm run test:e2e:medulla-whatsapp -- --forceExit
+          npm run test:e2e:subscription -- --forceExit
         timeout-minutes: 9
 
       - name: Build Medulla apps
