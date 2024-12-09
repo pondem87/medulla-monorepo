@@ -26,12 +26,6 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Install aws-cli
-        run: |
-          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-          unzip awscliv2.zip
-          sudo ./aws/install
-
       - name: Get environment variables from S3
         run: aws s3 cp s3://pfitz-configs/medulla/staging/.env .
 
