@@ -18,9 +18,9 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./apps/medulla/test/jest-e2e.json",
-    "test:e2e:medulla-whatsapp": "jest --config ./apps/medulla-whatsapp/test/jest-e2e.json",
-    "test:e2e:medulla-ai": "jest --config ./apps/medulla-ai/test/jest-e2e.json",
-    "test:e2e:subscription": "jest --config ./apps/subscription/test/jest-e2e.json"
+    "test:e2e:medulla-whatsapp": "jest --config ./apps/medulla-whatsapp/test/jest-e2e.ts",
+    "test:e2e:medulla-ai": "jest --config ./apps/medulla-ai/test/jest-e2e.ts",
+    "test:e2e:subscription": "jest --config ./apps/subscription/test/jest-e2e.ts"
   },
   "dependencies": {
     "@grpc/grpc-js": "^1.12.2",

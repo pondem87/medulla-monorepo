@@ -34,10 +34,6 @@ describe('MessageProcessor/MessageProcessorController (e2e)', () => {
         emitMessageSpy = jest.spyOn(testLLMRmqClient, 'emit');
     }, 20000);
 
-    afterAll(() => {
-        process.exit();
-    });
-
     it('process text message and send to LLM', async () => {
 
         await persistedStateRepository.delete({})

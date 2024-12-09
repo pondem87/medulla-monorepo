@@ -38,10 +38,6 @@ describe('WhatsappMessenger (e2e)', () => {
         await conversationRepository.delete({})
     }, 20000);
 
-    afterAll(() => {
-        process.exit();
-    });
-
     it("should send LLM text response to user", async () => {
 
         const payload: MessengerRMQMessage = {

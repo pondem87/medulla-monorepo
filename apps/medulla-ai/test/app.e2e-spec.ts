@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { MedullaAiModule } from '../src/medulla-ai.module';
+import { LONG_TEST_TIMEOUT, SHORT_TEST_TIMEOUT } from '@app/medulla-common/common/constants';
 
 describe('MedullaAiController (e2e)', () => {
   let app: INestApplication;
@@ -13,10 +14,10 @@ describe('MedullaAiController (e2e)', () => {
 
     app = moduleFixture.createNestApplication();
     await app.init();
-  }, 10000);
+  }, LONG_TEST_TIMEOUT);
 
-  afterAll(() => {
-    process.exit();
+  afterAll(async () => {
+    await app.close();
   });
 
   it('/ (GET) Health check', () => {
@@ -24,5 +25,5 @@ describe('MedullaAiController (e2e)', () => {
       .get('/')
       .expect(200)
       .expect('Server Active!');
-  }, 10000);
+  }, SHORT_TEST_TIMEOUT);
 });

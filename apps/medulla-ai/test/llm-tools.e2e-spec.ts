@@ -55,13 +55,19 @@ describe('MedullaAiController (e2e)', () => {
         await llmModelRepo.delete({})
         await llmPrefsRepo.delete({})
         await chatHistoryRepo.delete({})
-        await llmPrefsRepo.delete({})
-        await chatHistoryRepo.delete({})
-
     }, LONG_TEST_TIMEOUT);
 
-    afterAll(() => {
-        process.exit();
+    afterEach(async () => {
+        await Promise.all([
+            llmModelRepo.delete({}),
+            llmPrefsRepo.delete({}),
+            chatHistoryRepo.delete({})
+        ])
+    }, LONG_TEST_TIMEOUT)
+
+    afterAll(async () => {
+        await testRmqClient.close();
+        await app.close();
     });
 
     it('should process message', async () => {
@@ -112,10 +118,6 @@ describe('MedullaAiController (e2e)', () => {
         expect(chatMsgs[0].message.type).toEqual("ai")
         expect(res).toBe(true)
 
-        // cleanup database
-        await llmModelRepo.delete({ id: modelId })
-        await llmPrefsRepo.delete({ userId: mockUserId })
-        await chatHistoryRepo.delete({ userId: mockUserId })
     }, LONG_TEST_TIMEOUT);
 
     it('should process message from 2 users', async () => {
@@ -187,12 +189,6 @@ describe('MedullaAiController (e2e)', () => {
         expect(res).toBe(true)
         expect(res1).toBe(true)
 
-        // cleanup database
-        await llmModelRepo.delete({ id: modelId })
-        await llmPrefsRepo.delete({ userId: mockUserId })
-        await chatHistoryRepo.delete({ userId: mockUserId })
-        await llmPrefsRepo.delete({ userId: mockUserId1 })
-        await chatHistoryRepo.delete({ userId: mockUserId1 })
     }, LONG_TEST_TIMEOUT);
 
     it('should catch low balance', async () => {
@@ -248,9 +244,5 @@ describe('MedullaAiController (e2e)', () => {
         expect(chatMsgs.length).toBe(0)
         expect(res).toBe(true)
 
-        // cleanup database
-        await llmModelRepo.delete({ id: modelId })
-        await llmPrefsRepo.delete({ userId: mockUserId })
-        await chatHistoryRepo.delete({ userId: mockUserId })
     }, LONG_TEST_TIMEOUT);
 });

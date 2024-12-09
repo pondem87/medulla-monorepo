@@ -54,6 +54,18 @@ export class LoggingService {
                 ]
                 break
 
+            case "staging":
+                logTransports = [
+                    new transports.Console(),
+                    new Loggly({
+                        token: this.config.get<string>("LOGGLY_TOKEN"),
+                        subdomain: this.config.get<string>("LOGGLY_SUBDOMAIN"),
+                        tags: this.config.get<string>("LOGGLY_TAG") + "-staging",
+                        json: true
+                    })
+                ]
+                break
+
             case "production":
                 logTransports = [
                     new transports.Console(),

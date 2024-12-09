@@ -30,11 +30,7 @@ describe('SubscriptionController (e2e)', () => {
 
         await subsRepository.delete({})        
     }, LONG_TEST_TIMEOUT);
-
-    afterAll(() => {
-        process.exit();
-    });
-
+    
     it('Create new subscription and return balance', async () => {
 
         const userId = "262777887788"

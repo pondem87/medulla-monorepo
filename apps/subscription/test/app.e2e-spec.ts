@@ -15,10 +15,6 @@ describe('SubscriptionController (e2e)', () => {
     await app.init();
   }, 15000);
 
-  afterAll(() => {
-    process.exit();
-  });
-
   it('/ (GET)', () => {
     return request(app.getHttpServer())
       .get('/')
