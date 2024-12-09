@@ -34,12 +34,13 @@ describe('WhatsappMessenger (e2e)', () => {
         sentMessageRepository = moduleFixture.get<Repository<SentMessage>>(getRepositoryToken(SentMessage))
         configService = moduleFixture.get<ConfigService>(ConfigService)
 
-    }, 20000);
-
-    beforeEach(async () => {
         await sentMessageRepository.delete({})
         await conversationRepository.delete({})
-    })
+    }, 20000);
+
+    afterAll(() => {
+        process.exit();
+    });
 
     it("should send LLM text response to user", async () => {
 

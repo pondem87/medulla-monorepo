@@ -25,6 +25,10 @@ describe('MedullaWhatsapp/WhatsappController (e2e)', () => {
         emitMessageSpy = jest.spyOn(testWhatsappRmqService, 'emit');
     }, 20000);
 
+    afterAll(() => {
+        process.exit();
+    });
+
     it('/whatsapp-webhook (GET): verify webhook - success', () => {
         return request(app.getHttpServer())
             .get(`/whatsapp-webhook?hub.mode=subscribe&hub.challenge=1158201444&hub.verify_token=${process.env.WEBHOOK_VERIFY_TOKEN}`)

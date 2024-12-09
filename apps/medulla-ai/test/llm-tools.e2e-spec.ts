@@ -60,6 +60,10 @@ describe('MedullaAiController (e2e)', () => {
 
     }, LONG_TEST_TIMEOUT);
 
+    afterAll(() => {
+        process.exit();
+    });
+
     it('should process message', async () => {
 
         // default chat model
