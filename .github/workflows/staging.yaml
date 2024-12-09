@@ -40,6 +40,9 @@ jobs:
           npm run test:e2e:subscription -- --forceExit
         timeout-minutes: 9
 
+      - name: Install Nest CLI
+        run: npm install -g @nestjs/cli
+
       - name: Build Medulla apps
         run: |
           nest build medulla-whatsapp
