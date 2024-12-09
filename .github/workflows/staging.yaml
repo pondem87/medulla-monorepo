@@ -23,6 +23,9 @@ jobs:
         with:
           node-version: '20.18.0'
 
+      - name: Check directory
+        run: pwd
+
       - name: Install dependencies
         run: npm install
 
