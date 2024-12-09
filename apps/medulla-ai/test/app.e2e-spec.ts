@@ -3,6 +3,7 @@ import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { MedullaAiModule } from '../src/medulla-ai.module';
 import { LONG_TEST_TIMEOUT, SHORT_TEST_TIMEOUT } from '@app/medulla-common/common/constants';
+import { LoggingService } from '@app/medulla-common/logging/logging.service';
 
 describe('MedullaAiController (e2e)', () => {
   let app: INestApplication;
@@ -17,8 +18,10 @@ describe('MedullaAiController (e2e)', () => {
   }, LONG_TEST_TIMEOUT);
 
   afterAll(async () => {
+    const loggingService = app.get(LoggingService);
+    await loggingService.close()
     await app.close();
-  });
+});
 
   it('/ (GET) Health check', () => {
     return request(app.getHttpServer())

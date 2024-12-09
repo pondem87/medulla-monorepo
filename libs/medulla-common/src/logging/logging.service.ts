@@ -103,4 +103,16 @@ export class LoggingService {
     }): Logger {
         return this.logger.child(config)
     }
+
+    async close(): Promise<boolean> {
+        return new Promise((resolve, reject) => {
+            try {
+                this.logger.close();
+                resolve(true);
+            } catch (error) {
+                console.log(error)
+                reject(false)
+            }
+        });
+    }
 }

@@ -13,6 +13,7 @@ import { ChatHistory } from '../src/llm-tools/entities/chat-history.entity';
 import { ChatMessage } from '../src/llm-tools/entities/chat-message.entity';
 import { SubscriptionService } from '../src/subscription/subscription.service';
 import { LONG_TEST_TIMEOUT } from '@app/medulla-common/common/constants';
+import { LoggingService } from '@app/medulla-common/logging/logging.service';
 
 describe('MedullaAiController (e2e)', () => {
     let app: INestApplication;
@@ -66,6 +67,8 @@ describe('MedullaAiController (e2e)', () => {
     }, LONG_TEST_TIMEOUT)
 
     afterAll(async () => {
+        const loggingService = app.get(LoggingService);
+        await loggingService.close()
         await testRmqClient.close();
         await app.close();
     });
