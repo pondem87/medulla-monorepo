@@ -37,3 +37,30 @@ jobs:
           npm run test:e2e:medulla-ai
           npm run test:e2e:medulla-whatsapp
           npm run test:e2e:subscription
+
+      - name: Build Medulla apps
+        run: |
+          nest build medulla-whatsapp
+          nest build medulla-ai
+          nest build subscription
+
+      - name: Build Docker images
+        run: |
+          docker build -f .\cicd\medulla-ai\Dockerfile -t medulla-ai:staging .
+          docker build -f .\cicd\medulla-whatsapp\Dockerfile -t medulla-whatsapp:staging .
+          docker build -f .\cicd\subscription\Dockerfile -t subscription:staging .
+
+      - name: Tag images
+        run: |
+          docker tag medulla-ai:staging 533267159380.dkr.ecr.eu-west-2.amazonaws.com/medulla/medulla-ai:staging
+          docker tag medulla-whatsapp:staging 533267159380.dkr.ecr.eu-west-2.amazonaws.com/medulla/medulla-whatsapp:staging
+          docker tag subscription:staging 533267159380.dkr.ecr.eu-west-2.amazonaws.com/medulla/subscription:staging
+
+      - name: Docker login AWS ECR
+        run: aws ecr get-login-password --region eu-west-2 | docker login --username AWS --password-stdin 533267159380.dkr.ecr.eu-west-2.amazonaws.com
+
+      - name: Push images to 533267159380.dkr.ecr.eu-west-2.amazonaws.com
+        run: |
+          docker push 533267159380.dkr.ecr.eu-west-2.amazonaws.com/medulla/medulla-ai:staging
+          docker push 533267159380.dkr.ecr.eu-west-2.amazonaws.com/medulla/medulla-whatsapp:staging
+          docker push 533267159380.dkr.ecr.eu-west-2.amazonaws.com/medulla/subscription:staging
