@@ -7,6 +7,6 @@
     "^.+\\.(t|j)s$": "ts-jest"
   },
   "moduleNameMapper": {
-    "^@app/medulla-common(.*)$": "/home/medulla/libs/medulla-common/src$1"
+    "^@app/medulla-common(.*)$": "/home/runner/work/medulla-monorepo/medulla-monorepo/libs/medulla-common/src$1"
   }
 }
