@@ -1,0 +1,31 @@
+name: Test and build Medulla apps
+
+on:
+  push:
+    branches:
+      - staging-0.1.4
+
+jobs:
+  test-and-build:
+    name: Test and build Medulla apps
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/Checkout@v3
+
+      - name: Setup Node v20.17 environment
+        uses: actions/setup-node@v4
+          with:
+            node-version: '20.18.0'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Unit Testing
+        run: npm run test
+
+      - name: E2E Testing
+        run: |
+          npm run test:e2e:medulla-ai
+          npm run test:e2e:medulla-whatsapp
+          npm run test:e2e:subscription
