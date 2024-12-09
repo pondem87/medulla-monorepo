@@ -51,9 +51,9 @@ jobs:
 
       - name: Build Docker images
         run: |
-          docker build -f .\cicd\medulla-ai\Dockerfile -t medulla-ai:staging .
-          docker build -f .\cicd\medulla-whatsapp\Dockerfile -t medulla-whatsapp:staging .
-          docker build -f .\cicd\subscription\Dockerfile -t subscription:staging .
+          docker build -f ./cicd/medulla-ai/Dockerfile -t medulla-ai:staging .
+          docker build -f ./cicd/medulla-whatsapp/Dockerfile -t medulla-whatsapp:staging .
+          docker build -f ./cicd/subscription/Dockerfile -t subscription:staging .
 
       - name: Tag images
         run: |
