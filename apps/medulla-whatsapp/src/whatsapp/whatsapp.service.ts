@@ -55,8 +55,8 @@ export class WhatsappService {
             payload.entry.forEach(entry => {
 
                 if (!(entry.id === this.whatsappAccountID)) {
-                    this.logger.warn(`Rejected whatsapp notififaction: WhatsApp Account ID mismatch (expected: ${this.whatsappAccountID}  got: ${entry.id})`)
-                    throw new HttpException("Wrong entry ID", HttpStatus.NOT_ACCEPTABLE)
+                    this.logger.debug(`Gracefully ignored whatsapp notififaction: WhatsApp Account ID mismatch (expected: ${this.whatsappAccountID}  got: ${entry.id})`)
+                    return "OK"
                 }
 
                 entry.changes.forEach(change => {
