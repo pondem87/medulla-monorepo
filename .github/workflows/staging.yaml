@@ -69,8 +69,8 @@ jobs:
       - name: Authenticate Kubectl for DOKS
         run: doctl kubernetes cluster kubeconfig save 48ff4ae6-13a8-44f7-8800-defdaff34688
 
-      - name: Upgrade staging helm releasse "medulla-stag"
+      - name: Upgrade staging helm releasse "medulla-staging"
         run: |
           cd helm
           aws s3 cp s3://pfitz-configs/medulla/staging/values-staging.yaml ./medulla
-          helm upgrade medulla-stag medulla -f medulla/values-staging.yaml
+          helm upgrade medulla-staging medulla -f medulla/values-staging.yaml

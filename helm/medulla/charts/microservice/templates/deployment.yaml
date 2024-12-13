@@ -21,7 +21,7 @@ spec:
       - name: {{ .app_name }}-container
         image: {{ .image.repo }}:{{ .image.tag }}
         imagePullPolicy: Always
-        comand: [{{ .app_command | quote }}],
+        command: [{{ .app_command | quote }}]
         args: [{{ .app_args | quote }}]
 
         ports:
