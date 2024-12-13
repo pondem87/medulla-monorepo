@@ -1,4 +1,4 @@
-name: Test and build Medulla apps
+name: Test and deploy Medulla staging
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
 
 jobs:
   test-and-build:
-    name: Test and build Medulla apps
+    name: Test, build, deploy Medulla apps to staging.
     runs-on: ubuntu-latest
     env:
       AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
@@ -53,16 +53,24 @@ jobs:
         run: docker build -f ./cicd/Dockerfile -t medulla-nest-apps:staging .
 
       - name: Tag images
-        run: |
-          docker tag medulla-nest-apps:staging registry.digitalocean.com/pfitz-cr/medulla-nest-apps:staging
+        run: docker tag medulla-nest-apps:staging registry.digitalocean.com/pfitz-cr/medulla-nest-apps:staging
+
+      - name: Docker login DigitalOcean Container Registry
+        run: echo "${{ secrets.DO_ACTIONS_API_TOKEN }}" | docker login -u pfidzetendai@gmail.com --password-stdin registry.digitalocean.com
+
+      - name: Push images to  registry.digitalocean.com
+        run: docker push registry.digitalocean.com/pfitz-cr/medulla-nest-apps:staging
 
       - name: Install doctl for DigitalOcean
         uses: digitalocean/action-doctl@v2
         with:
           token: ${{ secrets.DO_ACTIONS_API_TOKEN }}
 
-      - name: Docker login DigitalOcean Container Registry
-        run: doctl registry docker-config --read-write
+      - name: Authenticate Kubectl for DOKS
+        run: doctl kubernetes cluster kubeconfig save 48ff4ae6-13a8-44f7-8800-defdaff34688
 
-      - name: Push images to  registry.digitalocean.com
-        run: docker push registry.digitalocean.com/pfitz-cr/medulla-nest-apps:staging
+      - name: Upgrade staging helm releasse "medulla-stag"
+        run: |
+          cd helm
+          aws s3 cp s3://pfitz-configs/medulla/staging/values-staging.yaml ./medulla
+          helm upgrade medulla-stag medulla -f medulla/values-staging.yaml
