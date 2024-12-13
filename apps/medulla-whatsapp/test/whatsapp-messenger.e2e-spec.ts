@@ -9,6 +9,7 @@ import { MessengerRMQMessage } from "../src/whatsapp-messenger/dto/messenger-rmq
 import { MedullaWhatsappModule } from "../src/medulla-whatsapp.module";
 import { ConfigService } from "@nestjs/config";
 import { TextMessageBody } from "../src/whatsapp-messenger/types";
+import { LONG_TEST_TIMEOUT } from "@app/medulla-common/common/constants";
 
 global.fetch = jest.fn()
 
@@ -36,7 +37,11 @@ describe('WhatsappMessenger (e2e)', () => {
 
         await sentMessageRepository.delete({})
         await conversationRepository.delete({})
-    }, 20000);
+    }, LONG_TEST_TIMEOUT);
+
+    afterEach(() => {
+        global.fetch = jest.fn()
+    })
 
     it("should send LLM text response to user", async () => {
 
@@ -109,7 +114,114 @@ describe('WhatsappMessenger (e2e)', () => {
         await sentMessageRepository.delete({userId: payload.contact.wa_id})
         await conversationRepository.delete({userId: payload.contact.wa_id})
 
-    }, 20000)
+    }, LONG_TEST_TIMEOUT)
+
+
+    it("should send LLM text response to user in 2 messages if long text", async () => {
+
+        const frag = "this text will repeat until we get many messages. "
+        let text = ""
+
+        for (let i = 0; i < 100; i++) {
+            text += frag
+        }
+
+        const payload: MessengerRMQMessage = {
+            contact: {
+                profile: {
+                    name: "user-name"
+                },
+                wa_id: "123456789"
+            },
+            type: "text",
+            text: text,
+            conversationType: "service"
+        }
+
+        fetchSpy = jest.spyOn(global, 'fetch').mockResolvedValue({
+            ok: true,
+            json: jest.fn().mockResolvedValue({
+                messaging_product: "whatsapp",
+                contacts: [
+                    {
+                        input: payload.contact.wa_id,
+                        wa_id: payload.contact.wa_id
+                    }
+                ],
+                messages: [
+                    {
+                        id: "sent-message-id",
+                        message_status: "accepted",
+                    }
+                ]
+            })
+        } as unknown as Response)
+
+        const res = await whatsappMessengerController.prepareAndSendMessage(payload)
+
+        const endpoint = `${configService.get<string>("WHATSAPP_GRAPH_API")}/${configService.get<string>("WHATSAPP_API_VERSION")}/${configService.get<string>("WHATSAPP_NUMBER_ID")}/messages`
+        const messageBody1: TextMessageBody = {
+            messaging_product: "whatsapp",
+            recipient_type: "individual",
+            to: payload.contact.wa_id,
+            type: "text",
+            text: {
+                body: payload.text.slice(0, 4096),
+                preview_url: true
+            }
+        }
+        const messageBody2: TextMessageBody = {
+            messaging_product: "whatsapp",
+            recipient_type: "individual",
+            to: payload.contact.wa_id,
+            type: "text",
+            text: {
+                body: payload.text.slice(4096),
+                preview_url: true
+            }
+        }
+
+        const conv = await conversationRepository.findOneBy({userId: payload.contact.wa_id})
+        const msg = await sentMessageRepository.findBy({userId: payload.contact.wa_id})
+
+        expect(res).toBe(true)
+        expect(fetchSpy).toHaveBeenCalledTimes(2)
+        expect(fetchSpy).toHaveBeenNthCalledWith(
+            1,
+            endpoint,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${configService.get<string>("WHATSAPP_SYSTEM_TOKEN")}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(messageBody1)
+                }
+        )
+        expect(fetchSpy).toHaveBeenNthCalledWith(
+            2,
+            endpoint,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${configService.get<string>("WHATSAPP_SYSTEM_TOKEN")}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(messageBody2)
+                }
+        )
+        expect(conv?.userId).toEqual(payload.contact.wa_id)
+        expect(msg[0].wamid).toEqual("sent-message-id")
+        expect(msg[0].messageBody).toEqual(JSON.stringify(messageBody1))
+        expect(msg[1].wamid).toEqual("sent-message-id")
+        expect(msg[1].messageBody).toEqual(JSON.stringify(messageBody2))
+
+        // detele staff
+        await sentMessageRepository.delete({userId: payload.contact.wa_id})
+        await conversationRepository.delete({userId: payload.contact.wa_id})
+
+    }, LONG_TEST_TIMEOUT)
+
 
     it("it should reuse unexpired conversation", async () => {
         const wa_id = "223456789"
@@ -156,7 +268,7 @@ describe('WhatsappMessenger (e2e)', () => {
         // detele staff
         await sentMessageRepository.delete({userId: payload.contact.wa_id})
         await conversationRepository.delete({userId: payload.contact.wa_id})
-    }, 15000)
+    }, LONG_TEST_TIMEOUT)
 
     it("it should create new for expired conversation", async () => {
         const wa_id = "223356789"
@@ -207,6 +319,6 @@ describe('WhatsappMessenger (e2e)', () => {
         // detele staff
         await sentMessageRepository.delete({userId: payload.contact.wa_id})
         await conversationRepository.delete({userId: payload.contact.wa_id})
-    }, 15000)
+    }, LONG_TEST_TIMEOUT)
 
 });

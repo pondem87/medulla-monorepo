@@ -21,6 +21,8 @@ spec:
       - name: {{ .app_name }}-container
         image: {{ .image.repo }}:{{ .image.tag }}
         imagePullPolicy: Always
+        comand: [{{ .app_command | quote }}],
+        args: [{{ .app_args | quote }}]
 
         ports:
         {{- range .ports }}
@@ -56,7 +58,24 @@ spec:
               name: medulla-secret
               key: {{ . }}
         {{- end }}
+
+        livenessProbe:
+          httpGet:
+            path: {{ .health.path }}
+            port: {{ .health.port }}
+          initialDelaySeconds: 60
+          periodSeconds: 120
+          timeoutSeconds: 15
+          failureThreshold: 2
+          successThreshold: 1
         
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+          limits:
+            cpu: 200m
+            memory: 200Mi
 ---
 
 apiVersion: v1

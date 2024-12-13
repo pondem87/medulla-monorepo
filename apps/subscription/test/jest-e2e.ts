@@ -1,10 +1,11 @@
 import { Config } from 'jest';
+require('dotenv').config()
 
-let medulla_common_mapper = "/home/medulla/libs/medulla-common/src$1"
+let medulla_common_mapper_root = process.env.MEDULLA_COMMON_DEV_ROOT
 
 switch (process.env.NODE_ENV) {
 	case "staging":
-		medulla_common_mapper = "/home/runner/work/medulla-monorepo/medulla-monorepo/libs/medulla-common/src$1"
+		medulla_common_mapper_root = process.env.MEDULLA_COMMON_STAGING_ROOT
 		break;
 
 	default:
@@ -20,7 +21,7 @@ const config: Config = {
 		"^.+\\.(t|j)s$": "ts-jest"
 	},
 	"moduleNameMapper": {
-		"^@app/medulla-common(.*)$": medulla_common_mapper
+		"^@app/medulla-common(.*)$": medulla_common_mapper_root + "/libs/medulla-common/src$1"
 	}
 }
 

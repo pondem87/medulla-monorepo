@@ -20,6 +20,13 @@ spec:
         image: {{ .Values.rmq.image.repo }}:{{ .Values.rmq.image.tag }}
         ports:
         - containerPort: {{ .Values.rmq.port }}
+        resources:
+          requests:
+            cpu: 150m
+            memory: 150Mi
+          limits:
+            cpu: 300m
+            memory: 300Mi
 
 ---
 
