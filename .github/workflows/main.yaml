@@ -69,8 +69,8 @@ jobs:
       - name: Authenticate Kubectl for DOKS
         run: doctl kubernetes cluster kubeconfig save 48ff4ae6-13a8-44f7-8800-defdaff34688
 
-      - name: Upgrade staging helm release "medulla-production"
+      - name: Upgrade staging helm release "medulla-prod"
         run: |
           cd helm
-          aws s3 cp s3://pfitz-configs/medulla/production/values-prod.yaml ./medulla
-          helm upgrade medulla-production medulla -f medulla/values-prod.yaml
+          aws s3 cp s3://pfitz-configs/medulla/prod/values-prod.yaml ./medulla
+          helm upgrade medulla-prod medulla -f medulla/values-prod.yaml
