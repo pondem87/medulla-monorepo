@@ -6,6 +6,7 @@ import { ConfigModule } from "@nestjs/config";
 import { LLMCallbackHandler } from "./llm-callback-handler";
 import { BaseMessage, HumanMessage, SystemMessage } from "@langchain/core/messages";
 import { tool } from "@langchain/core/tools";
+import { SHORT_TEST_TIMEOUT } from "@app/medulla-common/common/constants";
 
 describe('LangGraphAgentProvider', () => {
     let provider: LangGraphAgentProvider;
@@ -24,7 +25,7 @@ describe('LangGraphAgentProvider', () => {
         }).compile();
 
         provider = module.get<LangGraphAgentProvider>(LangGraphAgentProvider);
-    });
+    }, SHORT_TEST_TIMEOUT);
 
     it('should be defined', () => {
         expect(provider).toBeDefined();
@@ -60,7 +61,7 @@ describe('LangGraphAgentProvider', () => {
         const usage = handler.getUsage();
         expect(usage.inputTokens).toBeGreaterThan(0);
         expect(usage.outputTokens).toBeGreaterThan(0);
-    })
+    }, SHORT_TEST_TIMEOUT)
 
     it("should return a compiled graph, referrence system message", async () => {
         const f = jest.fn()
@@ -77,5 +78,5 @@ describe('LangGraphAgentProvider', () => {
         
         // check if system message referenced
         expect((finState.messages[finState.messages.length - 1] as BaseMessage).content).toMatch("Medulla")
-    })
+    }, SHORT_TEST_TIMEOUT)
 });
