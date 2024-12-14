@@ -58,7 +58,7 @@ describe('LLMProcessStateMachineProvider', () => {
 
 	const mockLangGraphAgentProvider = {
 		getAgent: jest.fn().mockImplementation((...params) => {
-			mockCallbackHandler = params[1]
+			mockCallbackHandler = params[2]
 			return {
 				invoke: mockInvokeGraph
 			}
