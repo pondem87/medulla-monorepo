@@ -6,7 +6,7 @@ import { ToolNode } from "@langchain/langgraph/prebuilt";
 import { ChatOpenAI } from "@langchain/openai";
 import { DynamicTool } from "@langchain/core/tools";
 import { MessagesAnnotation, StateGraph } from "@langchain/langgraph";
-import { AIMessage } from "@langchain/core/messages";
+import { AIMessage, BaseMessage } from "@langchain/core/messages";
 import { ConfigService } from "@nestjs/config";
 
 @Injectable()
@@ -25,7 +25,7 @@ export class LangGraphAgentProvider {
         this.logger.info("Initializing LangGraphAgentProvider")
     }
 
-    getAgent(modelName: string, handler: LLMCallbackHandler, tools: DynamicTool[]) {
+    getAgent(modelName: string, sysMsg: BaseMessage, handler: LLMCallbackHandler, tools: DynamicTool[]) {
         const toolNode = new ToolNode(tools)
 
         const model = new ChatOpenAI({
@@ -50,7 +50,7 @@ export class LangGraphAgentProvider {
         }
 
         const callModel = async (state: typeof MessagesAnnotation.State) => {
-            const response = await model.invoke(state.messages);
+            const response = await model.invoke([sysMsg,...state.messages]);
     
             // We return a list, because this will get added to the existing list
             return { messages: [response] };

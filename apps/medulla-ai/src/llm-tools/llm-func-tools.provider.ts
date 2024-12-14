@@ -20,18 +20,18 @@ export class LLMFuncToolsProvider {
 
     getTools({userId}: {userId: string}): DynamicTool[] {
         return [
-            this.getSendMenuTool()
+            this.getCompanyInfoTool()
         ]
     }
 
-    getSendMenuTool(): DynamicTool {
+    getCompanyInfoTool(): DynamicTool {
         return tool(
             async () => {
-                return "Current menu sent to client."
+                return "Pfitztronic Proprietary Limited was founded by Dr Tendai Precious Pfidze and incorporated in Botswana in 2024. We provide AI services, software development including firmware and custom electronics design. Visit our website www.pfitz.co.zw or email on tpp@pfitz.co.zw for more information. Our new product Medulla is meant to provide convenient access to LLM services through Whatsapp. At its full maturity it will provide multimodal functionality allowing you to send pictures, audio and video as input and provide output in the same manner."
             },
             {
-                name: "send-menu",
-                description: "Send menu to client."
+                name: "pfitztronic-info",
+                description: "Get more information about Pfitztronic"
             }
         )
     }

@@ -4,7 +4,7 @@ import { LoggingService } from "@app/medulla-common/logging/logging.service";
 import { mockedLoggingService } from "../common/mocks";
 import { ConfigModule } from "@nestjs/config";
 import { LLMCallbackHandler } from "./llm-callback-handler";
-import { BaseMessage, HumanMessage } from "@langchain/core/messages";
+import { BaseMessage, HumanMessage, SystemMessage } from "@langchain/core/messages";
 import { tool } from "@langchain/core/tools";
 
 describe('LangGraphAgentProvider', () => {
@@ -34,7 +34,8 @@ describe('LangGraphAgentProvider', () => {
         const f = jest.fn()
         const handler = new LLMCallbackHandler()
         const modelName = "gpt-4o-mini"
-        const cg = provider.getAgent(modelName, handler, [
+        const sysMsg = new SystemMessage("You are Medulla, a helpful AI assistant.")
+        const cg = provider.getAgent(modelName, sysMsg, handler, [
             tool(
                 async () => {
                     f()
@@ -59,5 +60,22 @@ describe('LangGraphAgentProvider', () => {
         const usage = handler.getUsage();
         expect(usage.inputTokens).toBeGreaterThan(0);
         expect(usage.outputTokens).toBeGreaterThan(0);
+    })
+
+    it("should return a compiled graph, referrence system message", async () => {
+        const f = jest.fn()
+        const handler = new LLMCallbackHandler()
+        const modelName = "gpt-4o-mini"
+        const sysMsg = new SystemMessage("You are Medulla, a helpful AI assistant.")
+        const cg = provider.getAgent(modelName, sysMsg, handler, [])
+        const finState = await cg.invoke({
+            messages: [new HumanMessage("Who are you?")],
+        })
+
+        // check if ai responded
+        expect((finState.messages[finState.messages.length - 1] as BaseMessage)._getType()).toBe("ai")
+        
+        // check if system message referenced
+        expect((finState.messages[finState.messages.length - 1] as BaseMessage).content).toMatch("Medulla")
     })
 });

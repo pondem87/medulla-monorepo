@@ -1,4 +1,4 @@
-import { assign, createActor, createMachine, fromPromise, setup } from "xstate";
+import { assign, createActor, fromPromise, setup } from "xstate";
 import { Contact } from "../dto/contact.dto";
 import { Inject, Injectable } from "@nestjs/common";
 import { Logger } from "winston";
@@ -10,7 +10,7 @@ import { LangGraphAgentProvider } from "./langgraph-agent.provider";
 import { LLMFuncToolsProvider } from "./llm-func-tools.provider";
 import { ChatMessageHistory } from "./chat-message-history";
 import { ChatMessageHistoryProvider } from "./chat-message-history-provider";
-import { AIMessage, HumanMessage } from "@langchain/core/messages";
+import { AIMessage, HumanMessage, SystemMessage } from "@langchain/core/messages";
 import { BASE_CURRENCY_ISO, MessengerEventPattern, whatsappRmqClient } from "../common/constants";
 import { ClientProxy } from "@nestjs/microservices";
 import { MessengerRMQMessage } from "./dto/messenger-rmq-message.dto";
@@ -57,8 +57,9 @@ export class LLMProcessStateMachineProvider {
         const llmPrefs = await this.llmPrefsService.getPrefs(input.userId)
         const textModelName = llmPrefs.chatModel
         const handler = new LLMCallbackHandler()
+        const sysMsg = new SystemMessage("You are Medulla, a helpful AI assistant designed by Pfitztronic Proprietary Limited.")
 
-        const compliledGraph = this.langGraphAgentProvider.getAgent(textModelName, handler, this.llmFuncToolsProvider.getTools(input))
+        const compliledGraph = this.langGraphAgentProvider.getAgent(textModelName, sysMsg, handler, this.llmFuncToolsProvider.getTools(input))
 
         const chatMessageHistory = await this.chatMessageHistoryProvider.getChatMessageHistory({ userNumber: input.userId })
 
