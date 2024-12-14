@@ -1,19 +1,19 @@
-name: Test and deploy Medulla staging
+name: Test and deploy Medulla production
 
 on:
   push:
     branches:
-      - staging-0.1.4-no-run
+      - main
 
 jobs:
   test-and-build:
-    name: Test, build, deploy Medulla apps to staging.
+    name: Test, build, deploy Medulla production apps.
     runs-on: ubuntu-latest
     env:
       AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
       AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
       AWS_DEFAULT_REGION: us-west-2
-      NODE_ENV: staging
+      NODE_ENV: production
 
     steps:
       - name: Checkout code
@@ -50,16 +50,16 @@ jobs:
           nest build subscription
 
       - name: Build Docker images
-        run: docker build -f ./cicd/Dockerfile -t medulla-nest-apps:staging .
+        run: docker build -f ./cicd/Dockerfile -t medulla-nest-apps:latest .
 
       - name: Tag images
-        run: docker tag medulla-nest-apps:staging registry.digitalocean.com/pfitz-cr/medulla-nest-apps:staging
+        run: docker tag medulla-nest-apps:latest registry.digitalocean.com/pfitz-cr/medulla-nest-apps:latest
 
       - name: Docker login DigitalOcean Container Registry
         run: echo "${{ secrets.DO_ACTIONS_API_TOKEN }}" | docker login -u pfidzetendai@gmail.com --password-stdin registry.digitalocean.com
 
       - name: Push images to  registry.digitalocean.com
-        run: docker push registry.digitalocean.com/pfitz-cr/medulla-nest-apps:staging
+        run: docker push registry.digitalocean.com/pfitz-cr/medulla-nest-apps:latest
 
       - name: Install doctl for DigitalOcean
         uses: digitalocean/action-doctl@v2
@@ -69,8 +69,8 @@ jobs:
       - name: Authenticate Kubectl for DOKS
         run: doctl kubernetes cluster kubeconfig save 48ff4ae6-13a8-44f7-8800-defdaff34688
 
-      - name: Upgrade staging helm releasse "medulla-staging"
+      - name: Upgrade staging helm release "medulla-production"
         run: |
           cd helm
-          aws s3 cp s3://pfitz-configs/medulla/staging/values-staging.yaml ./medulla
-          helm upgrade medulla-staging medulla -f medulla/values-staging.yaml
+          aws s3 cp s3://pfitz-configs/medulla/production/values-prod.yaml ./medulla
+          helm upgrade medulla-production medulla -f medulla/values-prod.yaml
