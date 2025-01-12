@@ -8,7 +8,7 @@ ENV NODE_ENV=production
 COPY ./package.json ./
 
 # Install dependencies in production mode
-RUN npm install
+RUN npm install --legacy-peer-deps
 
 COPY ./dist/apps/medulla-ai ./medulla-ai
 COPY ./dist/apps/subscription ./subscription
