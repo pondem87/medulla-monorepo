@@ -81,7 +81,7 @@ export class WebSearchStateMachineProvider {
             }
             
         } else {
-            response = "This client does have enough credit to use the web search tool. Account needs funding."
+            response = "The user's account does not have enough credit to use the web search tool. Ask if user would like to fund their account."
         }
 
         return { response, success }

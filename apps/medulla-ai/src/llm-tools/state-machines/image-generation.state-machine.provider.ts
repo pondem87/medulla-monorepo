@@ -106,7 +106,7 @@ export class ImageGenerationStateMachineProvider {
         } else {
             success = false
             const balance = `${input.context.userBalance.currency}${toPrintableMoney(input.context.userBalance.amount)}`
-            response = "This client cannot request image generation because account is not funded. Balance is " + balance + "."
+            response = "This user cannot request image generation because user account is not funded. Balance is " + balance + ". Ask if user would like to fund their account."
         }
 
         return { response, success }

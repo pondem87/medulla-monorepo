@@ -37,7 +37,9 @@ export class LLMFuncToolsProvider {
         return [
             this.getCompanyInfoTool(),
             this.getImageGeneratationTool(contact),
-            this.getWebSearchTool(contact.wa_id)
+            this.getWebSearchTool(contact.wa_id),
+            this.getMainMenuTool(contact),
+            this.getAccountBalanceTool(contact.wa_id)
         ]
     }
 
@@ -122,7 +124,7 @@ export class LLMFuncToolsProvider {
     getMainMenuTool(contact: Contact): DynamicStructuredTool {
         return new DynamicStructuredTool({
             name: "menu-tool",
-            description: "Send the user a menu. Users can access additional functionality such as payments and preferences through the menu",
+            description: "Send the user a menu. Users can access additional functionality such as payments to fund their account and preferences through the menu",
             func: async () => {
                 const mainMenu: MessengerRMQMessage = {
                     contact: contact,
