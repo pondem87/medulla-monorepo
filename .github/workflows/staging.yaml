@@ -76,3 +76,4 @@ jobs:
           cd helm
           aws s3 cp s3://pfitz-configs/medulla/staging/values-staging.yaml ./medulla
           helm upgrade medulla-staging medulla -f medulla/values-staging.yaml
+          kubectl rollout restart deployment -n medulla-staging

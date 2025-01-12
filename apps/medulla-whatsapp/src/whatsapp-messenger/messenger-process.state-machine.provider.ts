@@ -169,8 +169,14 @@ export class MessengerProcessStateMachineProvider {
 
                 return imgMsgBody
 
+            case "message-body":
+                const anyMessageBody: MessageBody[] = []
+                anyMessageBody.push(context.payload.messageBody)
+
+                return anyMessageBody
+
             default:
-                this.logger.error("Failed to prepare message", context)
+                this.logger.error("Failed to prepare message: Unhandled case", context)
                 return null
         }
     }

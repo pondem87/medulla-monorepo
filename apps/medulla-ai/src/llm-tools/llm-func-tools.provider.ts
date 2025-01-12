@@ -70,7 +70,7 @@ export class LLMFuncToolsProvider {
                     contact,
                     prompt: input.prompt,
                     size: input.size,
-                    n: input.number
+                    n: input.number 
                 })
 
                 this.logger.debug("Starting image generation process.", { contact })

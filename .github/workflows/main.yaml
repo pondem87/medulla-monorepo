@@ -76,3 +76,4 @@ jobs:
           cd helm
           aws s3 cp s3://pfitz-configs/medulla/prod/values-prod.yaml ./medulla
           helm upgrade medulla-prod medulla -f medulla/values-prod.yaml
+          kubectl rollout restart deployment -n medulla-prod
