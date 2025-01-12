@@ -3,9 +3,8 @@ import { MessageProcessorService } from './message-processor.service';
 import { EventPattern } from '@nestjs/microservices';
 import { Logger } from 'winston';
 import { LoggingService } from "@app/medulla-common/logging/logging.service";
-import { Messages } from './dto/message.dto';
-import { Contact } from './dto/contact.dto';
-import { MessageEventPattern } from '../common/constants';
+import { MessageEventPattern, NoContactsMessageEventPattern } from '@app/medulla-common/common/constants';
+import { Contact, Messages } from '@app/medulla-common/common/whatsapp-api-types';
 
 
 @Controller()
@@ -28,5 +27,10 @@ export class MessageProcessorController {
   @EventPattern(MessageEventPattern)
   async processMessage(payload: { contact: Contact, message: Messages }) {
     await this.messageProcessorService.processMessage(payload)
+  }
+
+  @EventPattern(NoContactsMessageEventPattern)
+  async processNoContactsMessage(payload: { message: Messages }) {
+    await this.messageProcessorService.processNoContactsMessage(payload)
   }
 }

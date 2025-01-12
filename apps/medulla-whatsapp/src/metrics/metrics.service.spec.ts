@@ -1,11 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { MetricsService } from './metrics.service';
 import { LoggingService } from '@app/medulla-common/logging/logging.service';
-import { mockedLoggingService } from '../common/mocks';
-import { Repository } from 'typeorm';
 import { Conversation } from './entities/conversation.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { SentMessage } from './entities/sent-message.entity';
+import { mockedLoggingService } from '@app/medulla-common/common/mocks';
 
 describe('MetricsService', () => {
   let service: MetricsService;

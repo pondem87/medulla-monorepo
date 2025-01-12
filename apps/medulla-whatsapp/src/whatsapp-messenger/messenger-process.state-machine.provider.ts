@@ -1,13 +1,13 @@
 import { Injectable } from "@nestjs/common";
 import { Logger } from "winston";
 import { assign, createActor, fromPromise, setup } from "xstate";
-import { MessengerRMQMessage } from "./dto/messenger-rmq-message.dto";
 import { LoggingService } from "@app/medulla-common/logging/logging.service";
 import { MetricsService } from "../metrics/metrics.service";
-import { MessageBody, TextMessageBody } from "./types";
 import { Conversation } from "../metrics/entities/conversation.entity";
-import { StateMachineActor } from "@app/medulla-common/common/types";
+import { StateMachineActor } from "@app/medulla-common/common/extended-types";
 import { GraphAPIService } from "./graph-api.service";
+import { ImageMessageBody, MessageBody, TextMessageBody } from "@app/medulla-common/common/whatsapp-api-types";
+import { MessengerRMQMessage } from "@app/medulla-common/common/message-queue-types";
 
 @Injectable()
 export class MessengerProcessStateMachineProvider {
@@ -120,14 +120,14 @@ export class MessengerProcessStateMachineProvider {
         return createActor(this.MessengerProcessStateMachine, { input }) as StateMachineActor<MPSMEventType, MPSMContext>
     }
 
-    prepareMessage(input: { context: MPSMContext; }): MessageBody[] {
+    async prepareMessage(input: { context: MPSMContext; }): Promise<MessageBody[]> {
 
         const context = input.context
 
         switch (context.payload.type) {
             case "text":
 
-                let msgBody: TextMessageBody[] = []
+                const textMsgBody: TextMessageBody[] = []
 
                 const maxMsgChars = 4096
 
@@ -136,7 +136,7 @@ export class MessengerProcessStateMachineProvider {
                 for (let i = 0; i < numberOfChunks; i++) {
                     const start = i * maxMsgChars;
                     const end = start + maxMsgChars;
-                    msgBody.push({
+                    textMsgBody.push({
                         messaging_product: "whatsapp",
                         recipient_type: "individual",
                         to: context.payload.contact.wa_id,
@@ -148,7 +148,26 @@ export class MessengerProcessStateMachineProvider {
                     })
                 }
 
-                return msgBody
+                return textMsgBody
+            
+            case "image":
+
+                const imageLink = context.payload.mediaLink
+
+                const imgMsgBody: ImageMessageBody[] = []
+
+                imgMsgBody.push({
+                    messaging_product: "whatsapp",
+                    recipient_type: "individual",
+                    to: context.payload.contact.wa_id,
+                    type: "image",
+                    image: {
+                        id: await this.graphApiService.uploadMedia(imageLink),
+                        caption: "Image by Medulla"
+                    }
+                })
+
+                return imgMsgBody
 
             default:
                 this.logger.error("Failed to prepare message", context)

@@ -1,9 +1,9 @@
 import { LoggingService } from '@app/medulla-common/logging/logging.service';
 import { Injectable } from '@nestjs/common';
 import { Logger } from 'winston';
-import { LLMQueueMessage } from './dto/llm-queue-message.dto';
-import { LLMProcessStateMachineProvider } from './llm-process.state-machine.provider';
+import { LLMProcessStateMachineProvider } from './state-machines/llm-process.state-machine.provider';
 import { AnyActorRef, waitFor } from 'xstate';
+import { LLMQueueMessage } from '@app/medulla-common/common/message-queue-types';
 
 @Injectable()
 export class LlmToolsService {

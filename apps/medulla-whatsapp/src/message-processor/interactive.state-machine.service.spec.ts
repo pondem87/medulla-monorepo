@@ -1,14 +1,12 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { InteractiveStateMachineService } from "./interactive.state-machine.service";
-import { mockedLoggingService } from "../common/mocks";
 import { LoggingService } from "@app/medulla-common/logging/logging.service";
+import { mockedLoggingService } from "@app/medulla-common/common/mocks";
 
 describe('MessageProcessorService', () => {
 	let service: InteractiveStateMachineService;
 
-	const mockedPersistedInteractiveStateRepository = {
-
-	}
+	const mockedPersistedInteractiveStateRepository = {}
 
 	beforeEach(async () => {
 		const module: TestingModule = await Test.createTestingModule({

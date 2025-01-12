@@ -4,16 +4,18 @@ import { MessageProcessorController } from './message-processor.controller';
 import { InteractiveStateMachineService } from './interactive.state-machine.service';
 import { LoggingService } from '@app/medulla-common/logging/logging.service';
 import { LLMQueueService } from './llm-queue.service';
-import { HomeStateService } from './home-state.service';
-import { InteractiveProcessesService } from './interactive.processes.service';
-import { FileRagModeService } from './file-rag-mode.service';
-import { FileUploadService } from './file-upload.service';
+import { HomeStateService } from './machine-states/home-state.service';
+import { FileRagModeService } from './machine-states/file-rag-mode.service';
+import { FileUploadService } from './machine-states/file-upload.service';
 import { ClientProxyFactory, Transport } from '@nestjs/microservices';
 import { ConfigService } from '@nestjs/config';
-import { llmRmqClient, whatsappRmqClient } from '../common/constants';
 import { MessageProcessingStateMachineProvider } from './message-processing.state-machine.provider';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { PersistedInteractiveState } from './entities/persisted-interactive-state';
+import { llmRmqClient, whatsappRmqClient } from '@app/medulla-common/common/constants';
+import { InteractiveStateMachineProvider } from './interactive.state-machine.provider';
+import { PaymentMethodSelectionService } from './machine-states/payment-method-selection.service';
+import { ZimMobilePaymentService } from './machine-states/zim-mobile-payment.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([PersistedInteractiveState])],
@@ -22,8 +24,10 @@ import { PersistedInteractiveState } from './entities/persisted-interactive-stat
     MessageProcessorService,
     LLMQueueService,
     InteractiveStateMachineService,
-    InteractiveProcessesService,
+    InteractiveStateMachineProvider,
     MessageProcessingStateMachineProvider,
+    PaymentMethodSelectionService,
+    ZimMobilePaymentService,
     HomeStateService,
     FileRagModeService,
     FileUploadService,

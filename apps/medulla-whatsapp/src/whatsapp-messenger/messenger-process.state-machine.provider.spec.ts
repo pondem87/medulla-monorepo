@@ -1,12 +1,12 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { MessengerProcessStateMachineProvider } from "./messenger-process.state-machine.provider";
 import { LoggingService } from "@app/medulla-common/logging/logging.service";
-import { mockedLoggingService } from "../common/mocks";
-import { MessengerRMQMessage } from "./dto/messenger-rmq-message.dto";
 import { MetricsService } from "../metrics/metrics.service";
 import { AnyActorRef, waitFor } from "xstate";
 import { Conversation } from "../metrics/entities/conversation.entity";
 import { GraphAPIService } from "./graph-api.service";
+import { mockedLoggingService } from "@app/medulla-common/common/mocks";
+import { MessengerRMQMessage } from "@app/medulla-common/common/message-queue-types";
 
 describe('MessengerProcessStateMachineProvider', () => {
 	let mpsmProvider: MessengerProcessStateMachineProvider;

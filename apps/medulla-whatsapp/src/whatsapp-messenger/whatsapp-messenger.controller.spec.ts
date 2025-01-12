@@ -2,8 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { WhatsappMessengerController } from './whatsapp-messenger.controller';
 import { WhatsappMessengerService } from './whatsapp-messenger.service';
 import { LoggingService } from '@app/medulla-common/logging/logging.service';
-import { mockedLoggingService } from '../common/mocks';
-
+import { mockedLoggingService } from '@app/medulla-common/common/mocks';
 describe('WhatsappMessengerController', () => {
   let controller: WhatsappMessengerController;
 

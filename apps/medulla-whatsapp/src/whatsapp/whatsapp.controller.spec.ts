@@ -2,8 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { WhatsappController } from './whatsapp.controller';
 import { WhatsappService } from './whatsapp.service';
 import { LoggingService } from '@app/medulla-common/logging/logging.service';
-import { mockedLoggingService } from '../common/mocks';
-import { WebhookPayloadDto } from './dto/webhook-payload.dto';
+import { mockedLoggingService } from '@app/medulla-common/common/mocks';
+import { WhatsAppWebhookPayloadDto } from '@app/medulla-common/common/whatsapp-api-types';
 
 describe('WhatsappController', () => {
 	let controller: WhatsappController;
@@ -45,7 +45,7 @@ describe('WhatsappController', () => {
 	})
 
 	it('receive webhook payload', () => {
-		const payload: WebhookPayloadDto = {
+		const payload: WhatsAppWebhookPayloadDto = {
 			"object": "whatsapp_business_account",
 			"entry": [
 				{

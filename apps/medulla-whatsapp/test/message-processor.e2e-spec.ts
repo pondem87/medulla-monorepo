@@ -1,14 +1,13 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { INestApplication } from "@nestjs/common";
 import { ClientProxy } from "@nestjs/microservices";
-import { LLMEventPattern, llmRmqClient } from "../src/common/constants";
 import { MessageProcessorController } from "../src/message-processor/message-processor.controller";
-import { Contact } from "../src/message-processor/dto/contact.dto";
-import { Messages } from "../src/message-processor/dto/message.dto";
 import { MedullaWhatsappModule } from "../src/medulla-whatsapp.module";
 import { Repository } from "typeorm";
 import { PersistedInteractiveState } from "../src/message-processor/entities/persisted-interactive-state";
 import { getRepositoryToken } from "@nestjs/typeorm";
+import { LLMEventPattern, llmRmqClient } from "@app/medulla-common/common/constants";
+import { Contact, Messages } from "@app/medulla-common/common/whatsapp-api-types";
 
 describe('MessageProcessor/MessageProcessorController (e2e)', () => {
     let app: INestApplication;

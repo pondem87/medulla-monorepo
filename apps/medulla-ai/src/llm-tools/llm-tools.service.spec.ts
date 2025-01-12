@@ -2,9 +2,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { LlmToolsService } from './llm-tools.service';
 import { LoggingService } from '@app/medulla-common/logging/logging.service';
 import { mockedLoggingService } from '../common/mocks';
-import { LLMProcessStateMachineProvider } from './llm-process.state-machine.provider';
-import { LLMQueueMessage } from './dto/llm-queue-message.dto';
+import { LLMProcessStateMachineProvider } from './state-machines/llm-process.state-machine.provider';
 import { waitFor } from 'xstate';
+import { LLMQueueMessage } from '@app/medulla-common/common/message-queue-types';
 
 jest.mock("xstate", () => ({
 	...jest.requireActual("xstate"), // Import other real methods to avoid breaking anything

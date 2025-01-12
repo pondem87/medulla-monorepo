@@ -2,7 +2,7 @@ import { EntityCommon } from "@app/medulla-common/common/entity-common";
 import { MAX_USER_NUMBER_LENGTH } from "@app/medulla-common/common/constants";
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 import { Snapshot } from "xstate";
-import { Contact } from "../dto/contact.dto";
+import { Contact } from "@app/medulla-common/common/whatsapp-api-types";
 
 @Entity()
 export class PersistedInteractiveState extends EntityCommon {

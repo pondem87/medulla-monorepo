@@ -38,6 +38,7 @@ jobs:
           npm run test:e2e:medulla-ai -- --forceExit
           npm run test:e2e:medulla-whatsapp -- --forceExit
           npm run test:e2e:subscription -- --forceExit
+          npm run test:e2e:payment -- --forceExit
         timeout-minutes: 9
 
       - name: Install Nest CLI
@@ -48,6 +49,7 @@ jobs:
           nest build medulla-whatsapp
           nest build medulla-ai
           nest build subscription
+          nest build payment
 
       - name: Build Docker images
         run: docker build -f ./cicd/Dockerfile -t medulla-nest-apps:staging .

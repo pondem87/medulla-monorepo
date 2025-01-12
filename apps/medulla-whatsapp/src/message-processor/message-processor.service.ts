@@ -1,10 +1,9 @@
 import { Injectable } from "@nestjs/common";
 import { Logger } from "winston";
 import { LoggingService } from "@app/medulla-common/logging/logging.service";
-import { Messages } from "./dto/message.dto";
 import { MessageProcessingStateMachineProvider } from "./message-processing.state-machine.provider";
 import { AnyActorRef, waitFor } from "xstate";
-import { Contact } from "./dto/contact.dto";
+import { Contact, Messages } from "@app/medulla-common/common/whatsapp-api-types";
 
 
 @Injectable()
@@ -34,11 +33,18 @@ export class MessageProcessorService {
 
 		await waitFor(
 			smActor as AnyActorRef,
-			(snapshot) => snapshot.hasTag("final")
+			(snapshot) => snapshot.hasTag("final"),
+			{
+				timeout: 120_000
+			}
 		)
 
 		if (smActor.getSnapshot().matches("Failure")) {
 			this.logger.error("Failed to process message", {error: smActor.getSnapshot().context.error})
 		}
+	}
+
+	async processNoContactsMessage(payload: { message: Messages }) {
+		this.logger.warn("Pending implementation", { details: { function: "processNoContactsMessage", args: payload }})
 	}
 }

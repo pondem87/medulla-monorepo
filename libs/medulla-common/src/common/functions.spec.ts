@@ -1,6 +1,6 @@
 import { DEFAULT_MONEY_MULTIPLIER } from "./constants"
-import { addMoney, changeMultiplier, deductMoney, getTotalCost } from "./functions"
-import { Money } from "./types"
+import { addMoney, changeMultiplier, deductMoney, getTotalCost, toPrintableMoney } from "./functions"
+import { Money } from "./extended-types"
 
 describe("Medulla-Common Test Functions", () => {
     it("calculate total cost", () => {
@@ -142,5 +142,14 @@ describe("Medulla-Common Test Functions", () => {
         }
 
         expect(() => changeMultiplier(amountA, DEFAULT_MONEY_MULTIPLIER / 1000n)).toThrow(Error)
+    })
+
+    it("should convert money to printable money", () => {
+        const money: Money = {
+            amount: 111_000n,
+            multiplier: 100_000n
+        }
+
+        expect(toPrintableMoney(money)).toBe("1.11")
     })
 })

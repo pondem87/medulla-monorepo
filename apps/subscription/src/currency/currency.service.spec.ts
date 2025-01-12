@@ -3,7 +3,7 @@ import { CurrencyService } from './currency.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Currency } from './entities/currency.entity';
 import { LoggingService } from '@app/medulla-common/logging/logging.service';
-import { mockedLoggingService } from '../common/mocks';
+import { mockedLoggingService } from '@app/medulla-common/common/mocks';
 
 describe('CurrencyService', () => {
   let service: CurrencyService;

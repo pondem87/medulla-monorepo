@@ -1,10 +1,10 @@
+import { LLMEventPattern, llmRmqClient } from "@app/medulla-common/common/constants";
+import { LLMQueueMessage } from "@app/medulla-common/common/message-queue-types";
+import { Contact } from "@app/medulla-common/common/whatsapp-api-types";
 import { LoggingService } from "@app/medulla-common/logging/logging.service";
 import { Inject, Injectable } from "@nestjs/common";
 import { ClientProxy } from "@nestjs/microservices";
 import { Logger } from "winston";
-import { Contact } from "./dto/contact.dto";
-import { LLMEventPattern, llmRmqClient } from "../common/constants";
-import { LLMQueueMessage } from "./dto/llm-queue-message.dto";
 
 @Injectable()
 export class LLMQueueService {

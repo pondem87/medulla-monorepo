@@ -3,7 +3,7 @@ import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { MedullaWhatsappModule } from './../src/medulla-whatsapp.module';
 import { ClientProxy } from '@nestjs/microservices';
-import { MessageEventPattern, whatsappRmqClient } from '../src/common/constants';
+import { MessageEventPattern, whatsappRmqClient } from '@app/medulla-common/common/constants';
 
 describe('MedullaWhatsapp/WhatsappController (e2e)', () => {
     let app: INestApplication;

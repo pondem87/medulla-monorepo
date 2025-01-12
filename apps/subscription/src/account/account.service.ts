@@ -3,12 +3,12 @@ import { Subscription } from './entities/subscription.entity';
 import { UserBalanceUpdate } from '@app/medulla-common/proto/subscription.grpc';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { BASE_CURRENCY_ISO, PULA_ISO } from '../common/constants';
 import { CurrencyService } from '../currency/currency.service';
 import { LoggingService } from '@app/medulla-common/logging/logging.service';
 import { Logger } from 'winston';
-import { deductMoney } from '@app/medulla-common/common/functions';
-import { Money } from '@app/medulla-common/common/types';
+import { addMoney, deductMoney } from '@app/medulla-common/common/functions';
+import { Money } from '@app/medulla-common/common/extended-types';
+import { BASE_CURRENCY_ISO, PULA_ISO } from '@app/medulla-common/common/constants';
 
 @Injectable()
 export class AccountService {
@@ -76,6 +76,7 @@ export class AccountService {
                 multiplier: BigInt(data.delta.multiplier),
                 currency: data.delta.currency
             }
+            
             if (user.currencyIsoCode !== num_delta.currency) {
                 // convert delta
                 const convFactor = (await this.currencyService.findOne(user.currencyIsoCode))?.toBaseCurrencyMultiplier
@@ -88,10 +89,20 @@ export class AccountService {
                 num_delta.currency = user.currencyIsoCode
             }
 
-            const newBal: Money = deductMoney(
-                { amount: BigInt(user.balanceAmount), multiplier: BigInt(user.balanceMultiplier) },
-                { amount: num_delta.amount, multiplier: num_delta.multiplier }
-            )
+            let newBal: Money
+
+            if (data.sign < 0) {
+                newBal = deductMoney(
+                    { amount: BigInt(user.balanceAmount), multiplier: BigInt(user.balanceMultiplier) },
+                    { amount: num_delta.amount, multiplier: num_delta.multiplier }
+                )
+            } else {
+                newBal = addMoney(
+                    { amount: BigInt(user.balanceAmount), multiplier: BigInt(user.balanceMultiplier) },
+                    { amount: num_delta.amount, multiplier: num_delta.multiplier }
+                )
+            }
+
 
             if (newBal.amount < 0n) newBal.amount = 0n
 

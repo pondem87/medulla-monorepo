@@ -1,10 +1,10 @@
 import { Controller } from '@nestjs/common';
 import { LlmToolsService } from './llm-tools.service';
-import { LLMEventPattern } from '../common/constants';
 import { EventPattern } from '@nestjs/microservices';
-import { LLMQueueMessage } from './dto/llm-queue-message.dto';
 import { Logger } from 'winston';
 import { LoggingService } from '@app/medulla-common/logging/logging.service';
+import { LLMEventPattern } from '@app/medulla-common/common/constants';
+import { LLMQueueMessage } from '@app/medulla-common/common/message-queue-types';
 
 @Controller()
 export class LlmToolsController {

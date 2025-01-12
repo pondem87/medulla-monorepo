@@ -1,9 +1,9 @@
 import { LoggingService } from '@app/medulla-common/logging/logging.service';
 import { Injectable } from '@nestjs/common';
 import { Logger } from 'winston';
-import { MessengerRMQMessage } from './dto/messenger-rmq-message.dto';
 import { MessengerProcessStateMachineProvider } from './messenger-process.state-machine.provider';
 import { AnyActorRef, waitFor } from 'xstate';
+import { MessengerRMQMessage } from '@app/medulla-common/common/message-queue-types';
 
 @Injectable()
 export class WhatsappMessengerService {

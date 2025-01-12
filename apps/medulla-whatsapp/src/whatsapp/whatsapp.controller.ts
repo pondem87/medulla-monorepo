@@ -1,8 +1,8 @@
 import { Body, Controller, Get, HttpCode, ParseIntPipe, Post, Query } from '@nestjs/common';
 import { WhatsappService } from './whatsapp.service';
 import { Logger } from 'winston';
-import { WebhookPayloadDto } from './dto/webhook-payload.dto';
 import { LoggingService } from "@app/medulla-common/logging/logging.service";
+import { WhatsAppWebhookPayloadDto } from '@app/medulla-common/common/whatsapp-api-types';
 
 @Controller('whatsapp-webhook')
 export class WhatsappController {
@@ -26,7 +26,7 @@ export class WhatsappController {
     @HttpCode(200)
     @Post()
     receiveWhatsappHook(
-        @Body() payload: WebhookPayloadDto
+        @Body() payload: WhatsAppWebhookPayloadDto
     ) {
         this.logger.debug(
             "Received webhook notification payload",

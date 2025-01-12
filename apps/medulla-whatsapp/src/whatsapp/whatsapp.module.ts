@@ -4,7 +4,7 @@ import { WhatsappService } from './whatsapp.service';
 import { ConfigService } from '@nestjs/config';
 import { ClientProxyFactory, Transport } from '@nestjs/microservices';
 import { LoggingService } from '@app/medulla-common/logging/logging.service';
-import { whatsappRmqClient } from '../common/constants';
+import { whatsappRmqClient } from '@app/medulla-common/common/constants';
 
 
 @Module({

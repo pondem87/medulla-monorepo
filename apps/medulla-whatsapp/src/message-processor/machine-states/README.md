@@ -1,0 +1,3 @@
+# Machine states service implementation
+
+When the InteractiveStateMachine is in a specific state, there are specific behavious associated with that state. This actions are called in the "executing" child state. This state invokes a state machine actor and according to the current state, a function is called from these services. Each state where logic has been implemented, will have a service implememtation in this folder.

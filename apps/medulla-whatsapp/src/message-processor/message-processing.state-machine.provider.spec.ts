@@ -1,17 +1,19 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { MessageProcessingStateMachineProvider } from "./message-processing.state-machine.provider";
-import { mockedLoggingService } from "../common/mocks";
 import { LoggingService } from "@app/medulla-common/logging/logging.service";
 import { InteractiveStateMachineService } from "./interactive.state-machine.service";
-import { InteractiveProcessesService } from "./interactive.processes.service";
-import { Messages } from "./dto/message.dto";
-import { AnyActorRef, Snapshot, waitFor } from "xstate";
+import { AnyActorRef, createMachine, Snapshot, waitFor } from "xstate";
 import { PersistedInteractiveState } from "./entities/persisted-interactive-state";
-import { Contact } from "./dto/contact.dto";
+import { mockedLoggingService } from "@app/medulla-common/common/mocks";
+import { Contact, Messages } from "@app/medulla-common/common/whatsapp-api-types";
+import { InteractiveStateMachineProvider } from "./interactive.state-machine.provider";
+import { PaymentMethodSelectionService } from "./machine-states/payment-method-selection.service";
+import { ZimMobilePaymentService } from "./machine-states/zim-mobile-payment.service";
+import { HomeStateService } from "./machine-states/home-state.service";
 
 describe('MessageProcessorController', () => {
 	let smProvider: MessageProcessingStateMachineProvider;
-    
+
 	const mockedMessageProcessorService = {
 		processMessage: jest.fn()
 	}
@@ -21,14 +23,27 @@ describe('MessageProcessorController', () => {
 		savePersistedInteractiveState: jest.fn().mockImplementation((obj) => obj)
 	}
 
-	const mockedInteractiveProcessesService = {
-		processMessage: null
+	const mockedZimMobilePaymentService = {
+		promptStartPayment: jest.fn(),
+		promptChooseMethod: jest.fn(),
+		promptSetNumber: jest.fn(),
+		promptSetEmail: jest.fn(),
+		promptProcessPayment: jest.fn()
 	}
+
+	const mockedPaymentMethodSelectionService = {
+		promptPaymentMethodSelecion: jest.fn()
+	}
+
+	const mockedHomeStateService = {
+        executeHomeState: null
+    }
 
 	beforeEach(async () => {
 		const module: TestingModule = await Test.createTestingModule({
 			providers: [
 				MessageProcessingStateMachineProvider,
+				InteractiveStateMachineProvider,
 				{
 					provide: LoggingService,
 					useValue: mockedLoggingService
@@ -38,8 +53,16 @@ describe('MessageProcessorController', () => {
 					useValue: mockedInteractiveStateMachineService
 				},
 				{
-					provide: InteractiveProcessesService,
-					useValue: mockedInteractiveProcessesService
+					provide: PaymentMethodSelectionService,
+					useValue: mockedPaymentMethodSelectionService
+				},
+				{
+					provide: ZimMobilePaymentService,
+					useValue: mockedZimMobilePaymentService
+				},
+				{
+					provide: HomeStateService,
+					useValue: mockedHomeStateService
 				}
 			],
 		}).compile();
@@ -52,7 +75,7 @@ describe('MessageProcessorController', () => {
 		mockedInteractiveStateMachineService.savePersistedInteractiveState.mockClear()
 	})
 
-    it('should be defined', () => {
+	it('should be defined', () => {
 		expect(smProvider).toBeDefined();
 	});
 
@@ -107,7 +130,6 @@ describe('MessageProcessorController', () => {
 		}
 
 		mockedInteractiveStateMachineService.getPersistedInteractiveState = jest.fn().mockResolvedValue(null)
-		mockedInteractiveProcessesService.processMessage = jest.fn().mockResolvedValue(true)
 
 		const sm = smProvider.getMachineActor({
 			contact: contact,
@@ -127,14 +149,12 @@ describe('MessageProcessorController', () => {
 		expect(mockedInteractiveStateMachineService.getPersistedInteractiveState).toHaveBeenCalledTimes(1)
 		expect(mockedInteractiveStateMachineService.getPersistedInteractiveState).toHaveBeenCalledWith(contact.wa_id)
 		expect(sm.getSnapshot().context.ismActor.getSnapshot().context.contact).toEqual(contact)
-		expect(mockedInteractiveProcessesService.processMessage).toHaveBeenCalledTimes(1)
-		expect(mockedInteractiveProcessesService.processMessage).toHaveBeenCalledWith(sm.getSnapshot().context.ismActor, message)
 		expect(mockedInteractiveStateMachineService.savePersistedInteractiveState).toHaveBeenCalledTimes(1)
 		expect(mockedInteractiveStateMachineService.savePersistedInteractiveState).toHaveBeenCalledWith(expect.any(PersistedInteractiveState))
 		expect(sm.getSnapshot().matches("ProcessSuccess")).toBe(true)
 	})
 
-	it("should create a state machine from persisted state and run invoked actors", async() => {
+	it("should create a state machine from persisted state and run invoked actors", async () => {
 
 		const contact: Contact = {
 			profile: {
@@ -163,9 +183,9 @@ describe('MessageProcessorController', () => {
 			error: undefined,
 			value: stateValue,
 			historyValue: {},
-			context: { contact: contact, filePagination: {page: 0} },
+			context: { contact: contact, filePagination: { page: 0 } },
 			children: {}
-		  }
+		}
 
 		const persistedStateEntity: PersistedInteractiveState = {
 			id: "some-rando-id",
@@ -177,7 +197,6 @@ describe('MessageProcessorController', () => {
 		}
 
 		mockedInteractiveStateMachineService.getPersistedInteractiveState = jest.fn().mockResolvedValue(persistedStateEntity)
-		mockedInteractiveProcessesService.processMessage = jest.fn().mockResolvedValue(true)
 
 		const sm = smProvider.getMachineActor({
 			contact: contact,
@@ -198,8 +217,6 @@ describe('MessageProcessorController', () => {
 		expect(mockedInteractiveStateMachineService.getPersistedInteractiveState).toHaveBeenCalledWith(contact.wa_id)
 		expect(sm.getSnapshot().context.ismActor.getSnapshot().context.contact).toEqual(contact)
 		expect(sm.getSnapshot().context.ismActor.getSnapshot().matches(stateValue)).toBe(true)
-		expect(mockedInteractiveProcessesService.processMessage).toHaveBeenCalledTimes(1)
-		expect(mockedInteractiveProcessesService.processMessage).toHaveBeenCalledWith(sm.getSnapshot().context.ismActor, message)
 		expect(mockedInteractiveStateMachineService.savePersistedInteractiveState).toHaveBeenCalledTimes(1)
 		expect(mockedInteractiveStateMachineService.savePersistedInteractiveState).toHaveBeenCalledWith(sm.getSnapshot().context.persistedState)
 		expect(sm.getSnapshot().matches("ProcessSuccess")).toBe(true)

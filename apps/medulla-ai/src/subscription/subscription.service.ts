@@ -1,8 +1,8 @@
 import { LoggingService } from '@app/medulla-common/logging/logging.service';
-import { GrpcSubscriptionClient, SubscriptionServiceName, SubscriptionServicePackage, UserBalance, UserBalanceUpdate, UserId } from '@app/medulla-common/proto/subscription.grpc';
+import { GrpcSubscriptionClient, SubscriptionServiceName, UserBalance, UserBalanceUpdate, UserId } from '@app/medulla-common/proto/subscription.grpc';
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
-import { firstValueFrom, Observable } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { Logger } from 'winston';
 
 @Injectable()

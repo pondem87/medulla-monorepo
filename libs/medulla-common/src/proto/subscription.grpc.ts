@@ -18,7 +18,8 @@ export type UserBalanceDelta = {
 
 export type UserBalanceUpdate = {
     userId: string;
-    delta: UserBalanceDelta
+    delta: UserBalanceDelta;
+    sign: number
 }
 
 export interface GrpcSubscriptionClient {

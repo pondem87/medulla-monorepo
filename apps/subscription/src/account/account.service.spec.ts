@@ -3,10 +3,10 @@ import { AccountService } from './account.service';
 import { Subscription } from './entities/subscription.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { LoggingService } from '@app/medulla-common/logging/logging.service';
-import { mockedLoggingService } from '../common/mocks';
 import { CurrencyService } from '../currency/currency.service';
-import { BASE_CURRENCY_ISO, PULA_ISO } from '../common/constants';
 import { Currency } from '../currency/entities/currency.entity';
+import { mockedLoggingService } from '@app/medulla-common/common/mocks';
+import { BASE_CURRENCY_ISO, PULA_ISO } from '@app/medulla-common/common/constants';
 
 describe('AccountService', () => {
 	let service: AccountService;
@@ -76,7 +76,7 @@ describe('AccountService', () => {
 		expect(sub.balanceAmount).toBe(0n)
 	})
 
-	it('should update user balance', async () => {
+	it('should update user balance (deduction)', async () => {
 
 		const user: Subscription = {
 			userId: "263777887788",
@@ -95,7 +95,8 @@ describe('AccountService', () => {
 				amount: "150",
 				multiplier: "100000000",
 				currency: "USD"
-			}
+			},
+			sign: -1
 		})
 
 		expect(sub.userId).toBe(user.userId)
@@ -104,7 +105,37 @@ describe('AccountService', () => {
 		expect(sub.balanceAmount).toBe(99_999_850n)
 	})
 
-	it('should update user balance in BW', async () => {
+	it('should update user balance (addition)', async () => {
+
+		const user: Subscription = {
+			userId: "263777887788",
+			currencyIsoCode: "USD",
+			balanceAmount: 100_000n,
+			balanceMultiplier: 100_000n,
+			createdAt: new Date(),
+			updatedAt: new Date()
+		}
+		
+		mockSubscriptionRepository.findOneBy = jest.fn().mockResolvedValueOnce(user)
+
+		const sub = await service.patchUser({
+			userId: user.userId,
+			delta: {
+				amount: "150",
+				multiplier: "100000000",
+				currency: "USD"
+			},
+			sign: 0
+		})
+
+		expect(sub.userId).toBe(user.userId)
+		expect(mockSubscriptionRepository.findOneBy).toHaveBeenCalledWith({userId: user.userId})
+		expect(mockSubscriptionRepository.save).toHaveBeenCalledWith({...user, balanceAmount: 100_000_150n, balanceMultiplier: 100_000_000n})
+		expect(sub.balanceAmount).toBe(100_000_150n)
+	})
+
+
+	it('should update user balance in BW (deduction)', async () => {
 
 		const user: Subscription = {
 			userId: "263777887788",
@@ -133,7 +164,8 @@ describe('AccountService', () => {
 				amount: "150",
 				multiplier: "100000000",
 				currency: "USD"
-			}
+			},
+			sign: -1
 		})
 
 		expect(sub.userId).toBe(user.userId)
@@ -141,6 +173,46 @@ describe('AccountService', () => {
 		expect(mockCurrencyService.findOne).toHaveBeenCalledWith("BWP")
 		expect(mockSubscriptionRepository.save).toHaveBeenCalledWith({...user, balanceAmount: 99_997_997n, balanceMultiplier: 100_000_000n})
 		expect(sub.balanceAmount).toBe(99_997_997n)
+	})
+
+	it('should update user balance in BW (addition)', async () => {
+
+		const user: Subscription = {
+			userId: "263777887788",
+			currencyIsoCode: "BWP",
+			balanceAmount: 100_000n,
+			balanceMultiplier: 100_000n,
+			createdAt: new Date(),
+			updatedAt: new Date()
+		}
+
+		const bwp: Currency = {
+			id: "some-uuid",
+			name: "PULA",
+			isoCode: "BWP",
+			toBaseCurrencyMultiplier: 13.35,
+			createdAt: new Date(),
+			updatedAt: new Date()
+		}
+		
+		mockSubscriptionRepository.findOneBy = jest.fn().mockResolvedValueOnce(user)
+		mockCurrencyService.findOne = jest.fn().mockResolvedValueOnce(bwp)
+
+		const sub = await service.patchUser({
+			userId: user.userId,
+			delta: {
+				amount: "150",
+				multiplier: "100000000",
+				currency: "USD"
+			},
+			sign: 0
+		})
+
+		expect(sub.userId).toBe(user.userId)
+		expect(mockSubscriptionRepository.findOneBy).toHaveBeenCalledWith({userId: user.userId})
+		expect(mockCurrencyService.findOne).toHaveBeenCalledWith("BWP")
+		expect(mockSubscriptionRepository.save).toHaveBeenCalledWith({...user, balanceAmount: 100_002_003n, balanceMultiplier: 100_000_000n})
+		expect(sub.balanceAmount).toBe(100_002_003n)
 	})
 
 	it('should update user balance to 0n', async () => {
@@ -162,7 +234,8 @@ describe('AccountService', () => {
 				amount: "150",
 				multiplier: "100000000",
 				currency: "USD"
-			}
+			},
+			sign: -1
 		})
 
 		expect(sub.userId).toBe(user.userId)

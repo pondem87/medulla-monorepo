@@ -1,7 +1,7 @@
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 import { LLMModelType } from "../types";
 import { EntityCommon } from "@app/medulla-common/common/entity-common";
-import { Money } from "@app/medulla-common/common/types";
+import { Money } from "@app/medulla-common/common/extended-types";
 
 @Entity()
 export class LLMModel extends EntityCommon {

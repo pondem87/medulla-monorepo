@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { SubscriptionController } from './subscription.controller';
 import { SubscriptionService } from './subscription.service';
 import { LoggingService } from '@app/medulla-common/logging/logging.service';
-import { mockedLoggingService } from './common/mocks';
+import { mockedLoggingService } from '@app/medulla-common/common/mocks';
 
 describe('SubscriptionController', () => {
   let subscriptionController: SubscriptionController;

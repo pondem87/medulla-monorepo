@@ -2,9 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { MessageProcessorController } from './message-processor.controller';
 import { MessageProcessorService } from './message-processor.service';
 import { LoggingService } from '@app/medulla-common/logging/logging.service';
-import { mockedLoggingService } from '../common/mocks';
-import { Messages } from './dto/message.dto';
-import { Contact } from './dto/contact.dto';
+import { mockedLoggingService } from '@app/medulla-common/common/mocks';
+import { Contact, Messages } from '@app/medulla-common/common/whatsapp-api-types';
 
 describe('MessageProcessorController', () => {
 	let controller: MessageProcessorController;

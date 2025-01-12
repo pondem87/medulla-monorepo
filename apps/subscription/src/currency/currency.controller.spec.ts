@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { CurrencyController } from './currency.controller';
 import { CurrencyService } from './currency.service';
 import { LoggingService } from '@app/medulla-common/logging/logging.service';
-import { mockedLoggingService } from '../common/mocks';
+import { mockedLoggingService } from '@app/medulla-common/common/mocks';
 
 describe('CurrencyController', () => {
   let controller: CurrencyController;

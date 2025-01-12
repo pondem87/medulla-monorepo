@@ -13,6 +13,7 @@ RUN npm install
 COPY ./dist/apps/medulla-ai ./medulla-ai
 COPY ./dist/apps/subscription ./subscription
 COPY ./dist/apps/medulla-whatsapp ./medulla-whatsapp
+COPY ./dist/apps/payment ./payment
 COPY ./proto ./proto
 COPY ./ssl ./ssl
 

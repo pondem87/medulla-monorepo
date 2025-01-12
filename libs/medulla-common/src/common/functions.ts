@@ -1,4 +1,4 @@
-import { Money } from "./types";
+import { Money } from "./extended-types";
 
 export function getTotalCost(quantity: number, unitCost: Money): Money {
     const total: Money = {
@@ -53,6 +53,16 @@ export function changeMultiplier(money: Money, multiplier: bigint): Money {
     } else {
         return money
     }
+}
+
+export function toPrintableMoney(money: Money): string {
+    const factor = money.multiplier / 100n
+    const newMoney: Money = {
+        amount: money.amount / factor,
+        multiplier: money.multiplier / factor
+    }
+
+    return (Number(newMoney.amount) / Number(newMoney.multiplier)).toFixed(2)
 }
 
 export function isPowerOfTen(x: bigint): boolean {

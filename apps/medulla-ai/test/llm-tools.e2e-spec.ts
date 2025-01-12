@@ -3,7 +3,6 @@ import { INestApplication } from '@nestjs/common';
 import { MedullaAiModule } from './../src/medulla-ai.module';
 import { ClientProxy } from '@nestjs/microservices';
 import { LlmToolsController } from '../src/llm-tools/llm-tools.controller';
-import { MessengerEventPattern, whatsappRmqClient } from '../src/common/constants';
 import { LLMModel } from '../src/llm-tools/entities/llm-model.entity';
 import { Repository } from 'typeorm';
 import { LLMPrefs } from '../src/llm-tools/entities/llm-prefs.entity';
@@ -12,8 +11,7 @@ import { LLMModelType } from '../src/llm-tools/types';
 import { ChatHistory } from '../src/llm-tools/entities/chat-history.entity';
 import { ChatMessage } from '../src/llm-tools/entities/chat-message.entity';
 import { SubscriptionService } from '../src/subscription/subscription.service';
-import { LONG_TEST_TIMEOUT } from '@app/medulla-common/common/constants';
-import { LoggingService } from '@app/medulla-common/logging/logging.service';
+import { LONG_TEST_TIMEOUT, MessengerEventPattern, whatsappRmqClient } from '@app/medulla-common/common/constants';
 
 describe('MedullaAiController (e2e)', () => {
     let app: INestApplication;
@@ -27,7 +25,8 @@ describe('MedullaAiController (e2e)', () => {
     let llmPrefsRepo: Repository<LLMPrefs>
     let chatHistoryRepo: Repository<ChatHistory>
     let chatMessageRepo: Repository<ChatMessage>
-    let modelId: string
+    let textModelId: string
+    let imageModelId: string
     const mockUserId = "777888999"
     const mockUserId1 = "777888777"
 
@@ -59,6 +58,7 @@ describe('MedullaAiController (e2e)', () => {
     }, LONG_TEST_TIMEOUT);
 
     afterEach(async () => {
+        if (emitMessageSpy) emitMessageSpy.mockClear()
         await Promise.all([
             llmModelRepo.delete({}),
             llmPrefsRepo.delete({}),
@@ -66,17 +66,10 @@ describe('MedullaAiController (e2e)', () => {
         ])
     }, LONG_TEST_TIMEOUT)
 
-    afterAll(async () => {
-        const loggingService = app.get(LoggingService);
-        await loggingService.close()
-        await testRmqClient.close();
-        await app.close();
-    });
-
     it('should process message', async () => {
 
         // default chat model
-        modelId = (await llmModelRepo.save(
+        textModelId = (await llmModelRepo.save(
             llmModelRepo.create({
                 name: "gpt-4o-mini",
                 type: LLMModelType.CHAT,
@@ -126,7 +119,7 @@ describe('MedullaAiController (e2e)', () => {
     it('should process message from 2 users', async () => {
 
         // default chat model
-        modelId = (await llmModelRepo.save(
+        textModelId = (await llmModelRepo.save(
             llmModelRepo.create({
                 name: "gpt-4o-mini",
                 type: LLMModelType.CHAT,
@@ -202,7 +195,7 @@ describe('MedullaAiController (e2e)', () => {
         await chatHistoryRepo.delete({ userId: mockUserId })
 
         // default chat model
-        modelId = (await llmModelRepo.save(
+        textModelId = (await llmModelRepo.save(
             llmModelRepo.create({
                 name: "gpt-4o-mini",
                 type: LLMModelType.CHAT,
@@ -248,4 +241,65 @@ describe('MedullaAiController (e2e)', () => {
         expect(res).toBe(true)
 
     }, LONG_TEST_TIMEOUT);
+
+    it("should generate an image", async () => {
+        textModelId = (await llmModelRepo.save(
+            llmModelRepo.create({
+                name: "gpt-4o-mini",
+                type: LLMModelType.CHAT,
+                costPerInputToken: 15n,
+                costPerOutputToken: 60n,
+                costMultiplier: 100_000_000n
+            })
+        )).id
+
+        imageModelId = (await llmModelRepo.save(
+            llmModelRepo.create({
+                name: "dall-e-2",
+                type: LLMModelType.CHAT,
+                costPerInputToken: 4n,
+                costPerOutputToken: 4n,
+                costMultiplier: 100n
+            })
+        )).id
+
+        const input = {
+            contact: {
+                profile: {
+                    name: "some-guy"
+                },
+                wa_id: mockUserId
+            },
+            prompt: "Can you generate a picture of a cat in space",
+            ragMode: false
+        }
+
+        // spy on subscription
+        checkUserBalanceSpy = jest.spyOn(subscriptionService, 'checkUserBalance').mockResolvedValue({
+            amount: "100",
+            multiplier: "100",
+            currency: "USD"
+        })
+
+        updateUserBalanceSpy = jest.spyOn(subscriptionService, 'updateUserBalance').mockResolvedValue({
+            amount: "96",
+            multiplier: "100",
+            currency: "USD"
+        })
+
+        const res = await llmToolsController.processPayload(input)
+
+        expect(emitMessageSpy).toHaveBeenCalledTimes(2)
+        expect(emitMessageSpy).toHaveBeenNthCalledWith(
+            1,
+            MessengerEventPattern,
+            {
+                contact: input.contact,
+                mediaLink: expect.any(String),
+                type: "image",
+                conversationType: "service"
+            })
+        expect(emitMessageSpy).toHaveBeenNthCalledWith(2, MessengerEventPattern, { contact: input.contact, text: expect.any(String), type: "text", conversationType: "service" })
+        expect(res).toBe(true)
+    }, LONG_TEST_TIMEOUT)
 });

@@ -10,5 +10,16 @@ export enum PaymentMethod {
     MANUAL = "manual",
     ECOCASH = "ecocash",
     ONEMONEY = "onemoney",
-    TELECASH = "telecash"
+    INNBUCKS = "innbucks"
+}
+
+export enum PaymentGateway {
+    MANUAL = "manual",
+    PAYNOW = "paynow"
+}
+
+export type PaynowInitPaymentResult = {
+    success: boolean;
+    message?: string;
+    id?: string
 }

@@ -2,10 +2,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { WhatsappService } from './whatsapp.service';
 import { LoggingService } from '@app/medulla-common/logging/logging.service';
 import { ConfigService } from '@nestjs/config';
-import { mockedLoggingService } from '../common/mocks';
 import { HttpException } from '@nestjs/common';
-import { WebhookPayloadDto } from './dto/webhook-payload.dto';
-import { MessageEventPattern, whatsappRmqClient } from '../common/constants';
+import { MessageEventPattern, NoContactsMessageEventPattern, whatsappRmqClient } from '@app/medulla-common/common/constants';
+import { mockedLoggingService } from '@app/medulla-common/common/mocks';
+import { WhatsAppWebhookPayloadDto } from '@app/medulla-common/common/whatsapp-api-types';
 
 describe('WhatsappService', () => {
 	let service: WhatsappService;
@@ -69,7 +69,7 @@ describe('WhatsappService', () => {
 	});
 
 	it('should pass message "type: text" from webhook to queue', () => {
-		const payload: WebhookPayloadDto = {
+		const payload: WhatsAppWebhookPayloadDto = {
 			"object": "whatsapp_business_account",
 			"entry": [
 				{
@@ -118,7 +118,7 @@ describe('WhatsappService', () => {
 	})
 
 	it('should pass message "type: media" from webhook to queue', () => {
-		const payload: WebhookPayloadDto = {
+		const payload: WhatsAppWebhookPayloadDto = {
 			"object": "whatsapp_business_account",
 			"entry": [{
 				"id": whatsappAccountID,
@@ -162,10 +162,10 @@ describe('WhatsappService', () => {
 	})
 
 	it('should pass message "type: location" from webhook to queue', () => {
-		const payload: WebhookPayloadDto = {
+		const payload: WhatsAppWebhookPayloadDto = {
 			"object": "whatsapp_business_account",
 			"entry": [{
-				"id":  whatsappAccountID,
+				"id": whatsappAccountID,
 				"changes": [{
 					"value": {
 						"messaging_product": "whatsapp",
@@ -200,6 +200,48 @@ describe('WhatsappService', () => {
 		expect(mockedRmqClient.emit).toHaveBeenCalledTimes(1)
 		expect(mockedRmqClient.emit).toHaveBeenCalledWith(MessageEventPattern, {
 			contact: payload.entry[0].changes[0].value.contacts[0],
+			message: payload.entry[0].changes[0].value.messages[0]
+		})
+	})
+
+	it('should pass message "type: system" from webhook to queue', () => {
+		const payload: WhatsAppWebhookPayloadDto = {
+			"object": "whatsapp_business_account",
+			"entry": [
+				{
+					"changes": [
+						{
+							"field": "messages",
+							"value": {
+								"metadata": {
+									"phone_number_id": "326607507206446",
+									"display_phone_number": "26777084294"
+								},
+								"messaging_product": "whatsapp",
+								"messages": [
+									{
+										"system": {
+											"wa_id": "27750601873",
+											"type": "user_changed_number",
+											"body": "User A changed from 263718824344 to 27750601873"
+										},
+										"from": "263718824344",
+										"id": "wamid.HBgMMjYzNzE4ODI0MzQ0FQIAEhgSMDc0NUJEN0U1NzI3MEM3NTVGAA==",
+										"type": "system",
+										"timestamp": "1736605945"
+									}
+								]
+							}
+						}
+					],
+					"id": whatsappAccountID
+				}
+			]
+		}
+
+		expect(service.processWhatsappHookPayload(payload)).toBe("OK")
+		expect(mockedRmqClient.emit).toHaveBeenCalledTimes(1)
+		expect(mockedRmqClient.emit).toHaveBeenCalledWith(NoContactsMessageEventPattern, {
 			message: payload.entry[0].changes[0].value.messages[0]
 		})
 	})

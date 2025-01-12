@@ -1,10 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { MessageProcessorService } from './message-processor.service';
 import { LoggingService } from '@app/medulla-common/logging/logging.service';
-import { mockedLoggingService } from '../common/mocks';
-import { Messages } from './dto/message.dto';
 import { MessageProcessingStateMachineProvider } from './message-processing.state-machine.provider';
 import { waitFor } from 'xstate';
+import { mockedLoggingService } from '@app/medulla-common/common/mocks';
+import { Messages } from '@app/medulla-common/common/whatsapp-api-types';
 
 
 jest.mock("xstate", () => ({
@@ -81,7 +81,7 @@ describe('MessageProcessorService', () => {
 
 		expect(startActor).toHaveBeenCalledTimes(1)
 		expect(waitFor).toHaveBeenCalledTimes(1)
-		expect(waitFor).toHaveBeenCalledWith(actor, expect.any(Function))
+		expect(waitFor).toHaveBeenCalledWith(actor, expect.any(Function), { timeout: expect.any(Number) })
 		expect(hasTag).toHaveBeenCalledWith("final")
 		expect(matches).toHaveBeenCalledTimes(1)
 		expect(matches).toHaveBeenCalledWith("Failure")

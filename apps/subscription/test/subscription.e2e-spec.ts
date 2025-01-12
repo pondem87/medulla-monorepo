@@ -2,13 +2,12 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { SubscriptionModule } from './../src/subscription.module';
 import { SubscriptionController } from '../src/subscription.controller';
-import { BASE_CURRENCY_ISO } from '../src/common/constants';
 import { Repository } from 'typeorm';
 import { Subscription } from '../src/account/entities/subscription.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { UserBalanceUpdate } from '@app/medulla-common/proto/subscription.grpc';
 import { Currency } from '../src/currency/entities/currency.entity';
-import { LONG_TEST_TIMEOUT } from '@app/medulla-common/common/constants';
+import { BASE_CURRENCY_ISO, LONG_TEST_TIMEOUT } from '@app/medulla-common/common/constants';
 
 describe('SubscriptionController (e2e)', () => {
     let app: INestApplication;
@@ -73,7 +72,7 @@ describe('SubscriptionController (e2e)', () => {
         await subsRepository.delete({userId: user.userId})
     }, LONG_TEST_TIMEOUT)
 
-    it('Update and return balance', async () => {
+    it('Update and return balance (negative delta)', async () => {
 
         const user: Subscription = {
 			userId: "263777887788",
@@ -105,13 +104,47 @@ describe('SubscriptionController (e2e)', () => {
                 amount: "1630",
                 multiplier: "100000000",
                 currency: "USD"
-            }
+            },
+            sign: -1
         }
 
         const bal = await subscriptionController.updateUserBalance(userBalanceUpdate)
 
         expect(bal.amount).toEqual("99977652")
         expect(bal.multiplier).toEqual("100000000")
+        expect(bal.currency).toEqual(user.currencyIsoCode)
+
+        await subsRepository.delete({userId: user.userId})
+    }, LONG_TEST_TIMEOUT)
+
+    it('Update and return balance (positive delta)', async () => {
+
+        const user: Subscription = {
+			userId: "263777887788",
+			currencyIsoCode: "USD",
+			balanceAmount: 100n,
+			balanceMultiplier: 100n,
+			createdAt: new Date(),
+			updatedAt: new Date()
+		}
+
+        await subsRepository.save(subsRepository.create(user))
+
+
+        const userBalanceUpdate: UserBalanceUpdate = {
+            userId: user.userId,
+            delta: {
+                amount: "50",
+                multiplier: "100",
+                currency: "USD"
+            },
+            sign: 0
+        }
+
+        const bal = await subscriptionController.updateUserBalance(userBalanceUpdate)
+
+        expect(bal.amount).toEqual("150")
+        expect(bal.multiplier).toEqual("100")
         expect(bal.currency).toEqual(user.currencyIsoCode)
 
         await subsRepository.delete({userId: user.userId})

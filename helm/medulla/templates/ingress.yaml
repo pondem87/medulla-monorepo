@@ -17,6 +17,13 @@ spec:
     - host: {{ .Values.global.hosts.api }}
       http:
         paths:
+          - path: /payment/
+            pathType: Prefix
+            backend:
+              service:
+                name: payment-service
+                port:
+                  name: http
           - path: /
             pathType: Prefix
             backend:
@@ -24,3 +31,4 @@ spec:
                 name: medulla-whatsapp-service
                 port:
                   name: http
+          
