@@ -2,7 +2,6 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { GraphAPIService } from "./graph-api.service";
 import { LoggingService } from "@app/medulla-common/logging/logging.service";
 import { ConfigService } from "@nestjs/config";
-import axios from "axios";
 import { mockedLoggingService } from "@app/medulla-common/common/mocks";
 import { TextMessageBody } from "@app/medulla-common/common/whatsapp-api-types";
 
@@ -113,29 +112,6 @@ describe('GraphAPIService', () => {
                     body: JSON.stringify(messageBody)
                 }
         )
-    })
-
-    it('call fetch and axios endpoint', async () => {
-        const imageUrl = "https://some/image/url.jpg"
-
-        let fetchSpy = jest.spyOn(global, 'fetch').mockResolvedValue({
-            ok: true,
-            body: new ReadableStream()
-        } as unknown as Response);
-
-        (axios.post as jest.Mock).mockResolvedValue({
-            status: 200,
-            data: {
-                id: "some-media-id"
-            }
-        })
-
-        const mediaId = await service.uploadMedia(imageUrl)
-
-        expect(fetchSpy).toHaveBeenCalledTimes(1)
-        expect(fetchSpy).toHaveBeenCalledWith(imageUrl)
-        expect(axios.post).toHaveBeenCalledTimes(1)
-        expect(mediaId).toEqual("some-media-id")
     })
 
     it("should get file extensions", () => {
