@@ -20,7 +20,7 @@ export const ZimMobilePaymentMethods: {id: string; title: string; description: s
 ]
 
 export const MainMenuItems: {id: string; title: string; description: string}[] = [
-    { id: "payments-menu", title: "Recharge Your Account", description: "Buy credits to allow get access to paid features" },
+    { id: "payments-menu", title: "Recharge Your Account", description: "Buy credits to get access to paid features" },
     { id: "account-details", title: "Account Details", description: "Credit balance, AI models and more..." }
 ]
 

@@ -2,9 +2,9 @@ import { LoggingService } from "@app/medulla-common/logging/logging.service";
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { Logger } from "winston";
-import FormData from "form-data";
 import axios from "axios";
 import { MessageBody, MessagesResponse } from "@app/medulla-common/common/whatsapp-api-types";
+const FormData = require("form-data");
 
 @Injectable()
 export class GraphAPIService {
@@ -56,12 +56,12 @@ export class GraphAPIService {
 
             this.logger.debug("Uploading image: ", {mediaUrl})
 
-            const readStream = (await fetch(mediaUrl)).body
+            const readStream = await axios.get(mediaUrl, { responseType: 'stream' })
 
-            const formData = new FormData
+            const formData = new FormData()
             formData.append("messaging_product", "whatsapp")
             formData.append("type", this.getImageType(mediaUrl))
-            formData.append("file", readStream)
+            formData.append("file", readStream.data)
 
             const response = await axios.post(
                 `${this.configService.get<string>("WHATSAPP_GRAPH_API")}/${this.configService.get<string>("WHATSAPP_API_VERSION")}/${this.configService.get<string>("WHATSAPP_NUMBER_ID")}/media`,
@@ -78,7 +78,6 @@ export class GraphAPIService {
                 return null
             }
 
-            console.log("results: ", response)
             return response.data.id as string;
 
         } catch (error) {
@@ -118,5 +117,9 @@ export class GraphAPIService {
             console.error("Failed to get image file extension", {message: error.message, image_url: url});
             return null; // Return null if the URL is invalid
         }
+    }
+
+    generateBoundary(): string {
+        return '----WebKitFormBoundary' + Math.random().toString(36).slice(2);
     }
 }
