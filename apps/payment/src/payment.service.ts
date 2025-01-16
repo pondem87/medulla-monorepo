@@ -169,7 +169,7 @@ export class PaymentService {
 			if (oldStatus !== status) {
 				this.sendTextMessage(
 					payment.userId,
-					`Your payment of ${payment.currencyIso} ${Number(payment.amount).toFixed(2)} via "${payment.method}" was updated to "${status}"`
+					`Your payment of ${payment.currencyIso} ${Number(payment.amount).toFixed(2)} via "${payment.method}" was updated to "${status.toUpperCase()}"`
 				)
 			}
 			if (!payment.acknowledged) {
@@ -234,12 +234,21 @@ export class PaymentService {
 		const result = await paynow.pollTransaction(pollPayment.payment.pollUrl);
 
 		const status = this.reassignPaynowStatus(result.status)
+		const oldStatus = pollPayment.payment.status
 
-		pollPayment.payment.status = status
-		pollPayment.status = status
+		if (oldStatus !== status) {
+			this.sendTextMessage(
+				pollPayment.payment.userId,
+				`Your payment of ${pollPayment.payment.currencyIso} ${Number(pollPayment.payment.amount).toFixed(2)} via "${pollPayment.payment.method}" was updated to "${status.toUpperCase()}"`
+			)
+			
+			pollPayment.payment.status = status
+			pollPayment.status = status
 
-		await this.paymentRepository.save(pollPayment.payment)
-		await this.pollPaymentRepository.save(pollPayment)
+			await this.paymentRepository.save(pollPayment.payment)
+			await this.pollPaymentRepository.save(pollPayment)
+		}
+		
 	}
 
 	reassignPaynowStatus(paynowStatus: string): PaymentStatus {

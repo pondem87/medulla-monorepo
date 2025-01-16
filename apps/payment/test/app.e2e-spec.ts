@@ -79,7 +79,9 @@ describe('PaymentController (e2e)', () => {
 
 	afterEach(async () => {
 		await pollPaymentRepo.delete({}),
-			await paymentRepo.delete({})
+		await paymentRepo.delete({})
+
+		emitSpy.mockClear()
 	})
 
 	it('/ (GET)', () => {
@@ -246,7 +248,7 @@ describe('PaymentController (e2e)', () => {
 		expect(pollTransactionFunc).toHaveBeenNthCalledWith(2, payment2.pollUrl)
 		expect(pollTransactionFunc).toHaveBeenNthCalledWith(3, payment3.pollUrl)
 
-		expect(emitSpy).toHaveBeenCalledTimes(1)
+		expect(emitSpy).toHaveBeenCalledTimes(4)
 
 		const pollPayments2 = await pollPaymentRepo.find({ relations: { payment: true } })
 		expect(pollPayments2.length).toBe(1)
@@ -272,7 +274,7 @@ describe('PaymentController (e2e)', () => {
 		expect(pollPayments3[0].status).toBe("paid")
 		expect(pollPayments3[0].acknowledged).toBe(true)
 
-		expect(emitSpy).toHaveBeenCalledTimes(3)
+		expect(emitSpy).toHaveBeenCalledTimes(6)
 
 	}, LONG_TEST_TIMEOUT + LONG_TEST_TIMEOUT)
 });
