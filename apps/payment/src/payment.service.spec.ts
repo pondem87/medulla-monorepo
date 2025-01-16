@@ -11,6 +11,7 @@ import { SubscriptionService } from './subscription/subscription.service';
 import { randomUUID } from 'crypto';
 import { Paynow } from "better-paynow";
 import { mockedLoggingService } from '@app/medulla-common/common/mocks';
+import { whatsappRmqClient } from '@app/medulla-common/common/constants';
 
 const paymentAddFunc = jest.fn()
 const createPaymentFunc = jest.fn().mockImplementation(() => {
@@ -62,6 +63,8 @@ describe('PaymentController', () => {
     }
     const mockSubscriptionService = {}
 
+    const mockWhatAppClient = {}
+
     beforeEach(async () => {
         const app: TestingModule = await Test.createTestingModule({
             providers: [
@@ -85,6 +88,10 @@ describe('PaymentController', () => {
                 {
                     provide: SubscriptionService,
                     useValue: mockSubscriptionService
+                },
+                {
+                    provide: whatsappRmqClient,
+                    useValue: mockWhatAppClient
                 }
             ],
         }).compile();
