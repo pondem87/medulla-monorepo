@@ -725,7 +725,7 @@ export const paymentAmountList: InteractiveList = {
                 }
             ]
         }],
-        button: "See payment methods"
+        button: "See amount options"
     }
 }
 

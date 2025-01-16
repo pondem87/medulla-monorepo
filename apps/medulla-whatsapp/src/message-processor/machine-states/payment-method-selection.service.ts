@@ -116,14 +116,14 @@ export const paymentMethodsList: InteractiveList = {
         text: "Payment Options"
     },
     body: {
-        text: "Choose your method of payment from the list below."
+        text: "Choose your payment gateway from the list below."
     },
     footer: {
         text: MESSAGE_FOOTER_TEXT
     },
     action: {
         sections: [{
-            title: "Payment Methods",
+            title: "Payment Gateways",
             rows: paymentMethods.flatMap((method) => method)
         }, {
             title: "Other Options",
@@ -135,6 +135,6 @@ export const paymentMethodsList: InteractiveList = {
                 }
             ]
         }],
-        button: "See payment methods"
+        button: "See payment gateways"
     }
 }
