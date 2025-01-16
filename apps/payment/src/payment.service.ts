@@ -2,7 +2,7 @@ import { LoggingService } from '@app/medulla-common/logging/logging.service';
 import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Logger } from 'winston';
-import { PaymentGateway, PaymentMethod, PaymentStatus, PaynowInitPaymentResult } from './types';
+import { PaymentGateway, PaymentMethod, PaymentStatus } from './types';
 import { Paynow } from "better-paynow";
 import { randomUUID } from 'crypto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -35,7 +35,7 @@ export class PaymentService {
 	) {
 		this.logger = this.loggingService.getLogger({
 			module: "payment",
-			file: "payment.controller"
+			file: "payment.service"
 		})
 
 		this.logger.info("Initialising PaymentController")
@@ -93,7 +93,9 @@ export class PaymentService {
 			if (initRes.success) {
 				// These are the instructions to show the user. 
 				// Instruction for how the user can make payment
-				const instructions = initRes.instructions // Get Payment instructions for the selected mobile money method
+				const instructions = initRes.isInnbucks ?
+					`Use authorisation code: ${initRes.innbucks_info[0].authorizationcode}, or\nFollow link: ${initRes.innbucks_info[0].deep_link_url}` :
+					initRes.instructions; // Get Payment instructions for the selected mobile money method
 
 				// Get poll url for the transaction. This is the url used to check the status of the transaction. 
 				// You might want to save this, we recommend you do it

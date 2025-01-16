@@ -475,6 +475,9 @@ export class ZimMobilePaymentService {
                         paynowPaymentUrl,
                         {
                             method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
                             body: JSON.stringify({
                                 userId: context.contact.wa_id,
                                 product: `Medulla-US$${context.payment.amount}`,
@@ -500,7 +503,10 @@ export class ZimMobilePaymentService {
                     }
 
                     // inform user that payment failed
-
+                    this.sendTextMessage(
+                        context,
+                        `Processing of payment of US$${context.payment.amount} failed. You may try again.`
+                    )
                     return { type: "paymentError" }
                 } catch (error) {
                     this.logger.error("Payment failed with error", { error })

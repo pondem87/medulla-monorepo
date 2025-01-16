@@ -687,7 +687,7 @@ describe("ZimMobilePaymentsService", () => {
         expect(event).toEqual({ type: "nochange" })
     })
 
-    it("executeSetNumber failure 2", async () => {
+    it("executeSetEmail failure 2", async () => {
         const context: ISMContext = {
             contact: {
                 profile: {
@@ -801,6 +801,9 @@ describe("ZimMobilePaymentsService", () => {
             url,
             {
                 method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
                 body: JSON.stringify({
                     userId: context.contact.wa_id,
                     product: `Medulla-US$${context.payment.amount}`,
@@ -870,6 +873,9 @@ describe("ZimMobilePaymentsService", () => {
             url,
             {
                 method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
                 body: JSON.stringify({
                     userId: context.contact.wa_id,
                     product: `Medulla-US$${context.payment.amount}`,

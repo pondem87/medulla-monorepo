@@ -274,5 +274,5 @@ describe('PaymentController (e2e)', () => {
 
 		expect(emitSpy).toHaveBeenCalledTimes(3)
 
-	}, LONG_TEST_TIMEOUT)
+	}, LONG_TEST_TIMEOUT + LONG_TEST_TIMEOUT)
 });

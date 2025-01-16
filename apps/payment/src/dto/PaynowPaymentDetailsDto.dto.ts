@@ -1,5 +1,4 @@
 import { IsEmail, IsEnum, IsNumber, IsOptional, IsString } from "class-validator";
-import { PaymentMethod } from "../types";
 
 export class PaynowPaymentDetailsDto {
     @IsString()
