@@ -9,7 +9,7 @@ import { LangGraphAgentProvider } from "../agents/langgraph-agent.provider";
 import { LLMFuncToolsProvider } from "../llm-func-tools.provider";
 import { ChatMessageHistory } from "../chat-message-history/chat-message-history";
 import { ChatMessageHistoryProvider } from "../chat-message-history/chat-message-history-provider";
-import { AIMessage, BaseMessage, HumanMessage, SystemMessage } from "@langchain/core/messages";
+import { AIMessage, HumanMessage, SystemMessage } from "@langchain/core/messages";
 import { ClientProxy } from "@nestjs/microservices";
 import { LLMModelService } from "../llm-model.service";
 import { addMoney, getTotalCost, toPrintableMoney } from "@app/medulla-common/common/functions";
@@ -81,7 +81,7 @@ export class LLMProcessStateMachineProvider {
             })
 
             const aiMessage = finalState.messages[finalState.messages.length - 1] as AIMessage
-            await input.context.chatMessageHistory.addMessages(finalState.messages as BaseMessage[])
+            await input.context.chatMessageHistory.addMessages([new HumanMessage(input.context.prompt), aiMessage])
 
             response = aiMessage.content.toString()
         } else {
