@@ -1,5 +1,5 @@
 import { LoggingService } from '@app/medulla-common/logging/logging.service';
-import { Inject, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Logger } from 'winston';
 import { PaymentGateway, PaymentMethod, PaymentStatus } from './types';
@@ -146,6 +146,11 @@ export class PaymentService {
 	async processPaynowPaymentUpdate(data: any) {
 		this.logger.info("Paynow Update", { data })
 
+		if (!data) {
+			this.logger.warn("data is null or undefined")
+			throw new HttpException('body should not be null', HttpStatus.BAD_REQUEST)
+		}
+
 		const paynow = new Paynow(
 			this.configService.get<string>("PAYNOW_INTEGRATION_ID"),
 			this.configService.get<string>("PAYNOW_INTEGRATION_KEY"));
@@ -183,7 +188,7 @@ export class PaymentService {
 	}
 
 
-	@Cron("*/5 * * * *")
+	@Cron("*/5 * * * *", { name: "pollpayments" })
 	async pollPayments() {
 		const pollList = await this.pollPaymentRepository.find({
 			relations: {

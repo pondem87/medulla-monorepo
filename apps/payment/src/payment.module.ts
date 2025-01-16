@@ -12,6 +12,7 @@ import { PollPayment } from './entities/pollpayment.entity';
 import { SubscriptionService } from './subscription/subscription.service';
 import { whatsappRmqClient } from '@app/medulla-common/common/constants';
 import { ClientProxyFactory, Transport } from '@nestjs/microservices';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
 	imports: [
@@ -36,6 +37,7 @@ import { ClientProxyFactory, Transport } from '@nestjs/microservices';
 			inject: [ConfigService]
 		}),
 		TypeOrmModule.forFeature([Payment, PollPayment]),
+		ScheduleModule.forRoot(),
 		SubscriptionModule, MedullaCommonModule],
 	controllers: [PaymentController],
 	providers: [
