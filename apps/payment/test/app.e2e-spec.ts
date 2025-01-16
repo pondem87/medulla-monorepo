@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { PaymentModule } from './../src/payment.module';
-import { LONG_TEST_TIMEOUT, SHORT_TEST_TIMEOUT } from '@app/medulla-common/common/constants';
+import { LONG_TEST_TIMEOUT, SHORT_TEST_TIMEOUT, whatsappRmqClient } from '@app/medulla-common/common/constants';
 import { InitResponse, StatusResponse } from 'better-paynow';
 import { PaymentController } from '../src/payment.controller';
 import { Repository } from 'typeorm';
@@ -12,6 +12,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { PaymentService } from '../src/payment.service';
 import { UserBalanceUpdate } from '@app/medulla-common/proto/subscription.grpc';
 import { SubscriptionService } from '../src/subscription/subscription.service';
+import { ClientProxy } from '@nestjs/microservices';
 
 const paymentAddFunc = jest.fn()
 const createPaymentFunc = jest.fn().mockImplementation(() => {
@@ -43,6 +44,8 @@ describe('PaymentController (e2e)', () => {
 	let service: PaymentService
 	let paymentRepo: Repository<Payment>
 	let pollPaymentRepo: Repository<PollPayment>
+	let whatsAppQueueClient: ClientProxy
+	let emitSpy: jest.SpyInstance
 
 	const mockSubsService = {
 		updateUserBalance: jest.fn().mockImplementation(async (userBlanceUpdate: UserBalanceUpdate) => {
@@ -69,6 +72,9 @@ describe('PaymentController (e2e)', () => {
 		paymentRepo = app.get<Repository<Payment>>(getRepositoryToken(Payment))
 		pollPaymentRepo = app.get<Repository<PollPayment>>(getRepositoryToken(PollPayment))
 		service = app.get<PaymentService>(PaymentService)
+		whatsAppQueueClient = app.get<ClientProxy>(whatsappRmqClient)
+
+		emitSpy = jest.spyOn(whatsAppQueueClient, "emit")
 	}, LONG_TEST_TIMEOUT);
 
 	afterEach(async () => {
@@ -240,6 +246,8 @@ describe('PaymentController (e2e)', () => {
 		expect(pollTransactionFunc).toHaveBeenNthCalledWith(2, payment2.pollUrl)
 		expect(pollTransactionFunc).toHaveBeenNthCalledWith(3, payment3.pollUrl)
 
+		expect(emitSpy).toHaveBeenCalledTimes(1)
+
 		const pollPayments2 = await pollPaymentRepo.find({ relations: { payment: true } })
 		expect(pollPayments2.length).toBe(1)
 
@@ -263,6 +271,8 @@ describe('PaymentController (e2e)', () => {
 		const pollPayments3 = await pollPaymentRepo.find({ relations: { payment: true } })
 		expect(pollPayments3[0].status).toBe("paid")
 		expect(pollPayments3[0].acknowledged).toBe(true)
+
+		expect(emitSpy).toHaveBeenCalledTimes(3)
 
 	}, LONG_TEST_TIMEOUT)
 });

@@ -1,5 +1,5 @@
 import { LoggingService } from '@app/medulla-common/logging/logging.service';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Logger } from 'winston';
 import { PaymentGateway, PaymentMethod, PaymentStatus, PaynowInitPaymentResult } from './types';
@@ -13,6 +13,10 @@ import { Cron } from '@nestjs/schedule';
 import { PaynowPaymentDetailsDto } from './dto/PaynowPaymentDetailsDto.dto';
 import { Money } from '@app/medulla-common/common/extended-types';
 import { SubscriptionService } from './subscription/subscription.service';
+import { MessengerRMQMessage } from '@app/medulla-common/common/message-queue-types';
+import { MessengerEventPattern, whatsappRmqClient } from '@app/medulla-common/common/constants';
+import { ClientProxy } from '@nestjs/microservices';
+import { toPrintableMoney } from '@app/medulla-common/common/functions';
 
 @Injectable()
 export class PaymentService {
@@ -25,7 +29,9 @@ export class PaymentService {
 		private readonly paymentRepository: Repository<Payment>,
 		@InjectRepository(PollPayment)
 		private readonly pollPaymentRepository: Repository<PollPayment>,
-		private readonly subscriptionService: SubscriptionService
+		private readonly subscriptionService: SubscriptionService,
+		@Inject(whatsappRmqClient)
+		private readonly whatsAppQueueClient: ClientProxy
 	) {
 		this.logger = this.loggingService.getLogger({
 			module: "payment",
@@ -148,9 +154,17 @@ export class PaymentService {
 
 		const payment = await this.paymentRepository.findOneBy({ referenceId: update.reference })
 
+
 		if (payment) {
+			const oldStatus = payment.status
 			payment.status = status
 			await this.paymentRepository.save(payment)
+			if (oldStatus !== status) {
+				this.sendTextMessage(
+					payment.userId,
+					`Your payment of ${payment.currencyIso} ${Number(payment.amount).toFixed(2)} via "${payment.method}" was updated to "${status}"`
+				)
+			}
 			if (!payment.acknowledged) {
 				const pollPayment = await this.pollPaymentRepository.findOne({where: {payment: { id: payment.id }}})
 				if (pollPayment) {
@@ -280,7 +294,30 @@ export class PaymentService {
 				pollPayment.acknowledged = true
 				await this.paymentRepository.save(payment)
 				await this.pollPaymentRepository.save(pollPayment)
+				this.sendTextMessage(
+					payment.userId,
+					`Your payment of ${payment.currencyIso} ${Number(payment.amount).toFixed(2)} via "${payment.method}" was successful. Your new balance is ${result.currency} ${toPrintableMoney({amount: BigInt(result.amount), multiplier: BigInt(result.multiplier)})}`
+				)
 			}
 		}
+	}
+
+	sendTextMessage(phone: string, message: string): void {
+		const msg: MessengerRMQMessage = {
+			contact: {
+				profile: {
+					name: ""
+				},
+				wa_id: phone
+			},
+			type: "text",
+			conversationType: "service",
+			text: message
+		}
+
+		this.whatsAppQueueClient.emit(
+			MessengerEventPattern,
+			msg
+		)
 	}
 }
