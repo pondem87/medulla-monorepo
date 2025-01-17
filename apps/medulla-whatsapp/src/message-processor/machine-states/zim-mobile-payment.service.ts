@@ -106,9 +106,9 @@ export class ZimMobilePaymentService {
                 case ZimMobilePaymentMethods[1].id:
                     paymentMethod = ZimMobilePaymentMethods[1].title
                     break;
-                case ZimMobilePaymentMethods[2].id:
-                    paymentMethod = ZimMobilePaymentMethods[2].title
-                    break;
+                // case ZimMobilePaymentMethods[2].id:
+                //     paymentMethod = ZimMobilePaymentMethods[2].title
+                //     break;
                 case cancelPaymentId:
                     return this.cancelPayment(context)
 
