@@ -3,7 +3,7 @@ name: Test and deploy Medulla staging
 on:
   push:
     branches:
-      - staging-0.1.5
+      - staging-0.1.5-no-run
 
 jobs:
   test-and-build:

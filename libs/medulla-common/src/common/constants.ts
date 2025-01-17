@@ -15,7 +15,6 @@ export const LLMEventPattern = 'PROMPT_TO_LLM'
 
 export const ZimMobilePaymentMethods: {id: string; title: string; description: string}[] = [
     { id: "econet-paynow", title: "ecocash", description: "Econet Ecocash mobile wallet (USD)" },
-    { id: "onemoney-paynow", title: "onemoney", description: "NetOne OneMoney mobile wallet (USD)" },
     { id: "innbucks-paynow", title: "innbucks", description: "Pay with InnBucks" }
 ]
 
