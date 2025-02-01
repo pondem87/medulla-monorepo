@@ -74,11 +74,8 @@ export class LLMProcessStateMachineProvider {
 
         if (input.context.userBalance?.amount.amount > 0 || !chargeLLMService) {
             const finalState = await input.context.compiledLangGraph.invoke({
-                messages: [
-                    ...(await input.context.chatMessageHistory.getMessages()),
-                    new HumanMessage(input.context.prompt)
-                ]
-            })
+                messages: [new HumanMessage(input.context.prompt)]
+            }, { configurable: { thread_id: input.context.contact.wa_id }})
 
             const aiMessage = finalState.messages[finalState.messages.length - 1] as AIMessage
             await input.context.chatMessageHistory.addMessages([new HumanMessage(input.context.prompt), aiMessage])
