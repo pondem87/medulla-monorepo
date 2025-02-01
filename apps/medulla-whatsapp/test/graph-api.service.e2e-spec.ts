@@ -47,7 +47,7 @@ describe('WhatsappMessenger (e2e)', () => {
                 wa_id: "26776323310"
             },
             type: "image",
-            mediaLink: "https://www.pfitz.co.zw/images/work/20230304_151753.jpg",
+            mediaLink: "https://www.pfitz.co.zw/images/light_bulb_1.jpg",
             conversationType: "service"
         }
 
