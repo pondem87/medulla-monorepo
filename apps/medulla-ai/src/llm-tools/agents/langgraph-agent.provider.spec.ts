@@ -5,7 +5,7 @@ import { mockedLoggingService } from "../../common/mocks";
 import { ConfigModule } from "@nestjs/config";
 import { LLMCallbackHandler } from "../llm-callback-handler";
 import { BaseMessage, HumanMessage, SystemMessage } from "@langchain/core/messages";
-import { SHORT_TEST_TIMEOUT } from "@app/medulla-common/common/constants";
+import { LONG_TEST_TIMEOUT, SHORT_TEST_TIMEOUT } from "@app/medulla-common/common/constants";
 import { DynamicStructuredTool } from "@langchain/core/tools";
 import { z } from "zod"
 
@@ -26,7 +26,8 @@ describe('LangGraphAgentProvider', () => {
         }).compile();
 
         provider = module.get<LangGraphAgentProvider>(LangGraphAgentProvider);
-    }, SHORT_TEST_TIMEOUT);
+        await provider.setUpCheckPointer()
+    }, LONG_TEST_TIMEOUT);
 
     it('should be defined', () => {
         expect(provider).toBeDefined();
@@ -51,7 +52,7 @@ describe('LangGraphAgentProvider', () => {
         ])
         const finState = await cg.invoke({
             messages: [new HumanMessage("Can I see the menu?")],
-        })
+        }, { configurable: { thread_id: "77255656"}})
 
         // check if tool called
         expect(f).toHaveBeenCalledTimes(1)
@@ -62,7 +63,7 @@ describe('LangGraphAgentProvider', () => {
         const usage = handler.getUsage();
         expect(usage.inputTokens).toBeGreaterThan(0);
         expect(usage.outputTokens).toBeGreaterThan(0);
-    }, SHORT_TEST_TIMEOUT)
+    }, LONG_TEST_TIMEOUT)
 
     it("should return a compiled graph, referrence system message", async () => {
         const f = jest.fn()
@@ -72,12 +73,12 @@ describe('LangGraphAgentProvider', () => {
         const cg = provider.getAgent(modelName, sysMsg, handler, [])
         const finState = await cg.invoke({
             messages: [new HumanMessage("Who are you?")],
-        })
+        }, { configurable: { thread_id: "77255656"}})
 
         // check if ai responded
         expect((finState.messages[finState.messages.length - 1] as BaseMessage)._getType()).toBe("ai")
 
         // check if system message referenced
         expect((finState.messages[finState.messages.length - 1] as BaseMessage).content).toMatch("Medulla")
-    }, SHORT_TEST_TIMEOUT)
+    }, LONG_TEST_TIMEOUT)
 });

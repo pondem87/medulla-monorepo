@@ -9,6 +9,7 @@ import { Annotation, messagesStateReducer, StateGraph } from "@langchain/langgra
 import { AIMessage, BaseMessage, RemoveMessage, SystemMessage } from "@langchain/core/messages";
 import { ConfigService } from "@nestjs/config";
 import { PostgresSaver } from "@langchain/langgraph-checkpoint-postgres"
+import { checkTableExists } from "../check-database";
 
 const GraphStateAnnotation = Annotation.Root({
     messages: Annotation<BaseMessage[]>({
@@ -25,6 +26,7 @@ export class LangGraphAgentProvider {
     private maxMessages: number
     private minMessages: number
     private checkPointer: PostgresSaver
+    private connString: string
 
     constructor(
         private readonly loggingService: LoggingService,
@@ -40,13 +42,18 @@ export class LangGraphAgentProvider {
         this.minMessages = Number(this.configService.get<string>("CHAT_HISTORY_WINDOW_LENGTH")) || 8
         this.maxMessages = this.minMessages * 2
 
-        this.checkPointer = PostgresSaver.fromConnString(
-            `postgresql://${configService.get<string>("DB_USERNAME")}:${configService.get<string>("DB_PASSWORD")}@${configService.get<string>("DB_HOST")}`
+        this.connString = `postgresql://${encodeURIComponent(configService.get<string>("DB_USERNAME"))}:${encodeURIComponent(configService.get<string>("DB_PASSWORD"))}@${configService.get<string>("DB_HOST")}`
             + `:${configService.get<string>("DB_PORT")}/${configService.get<string>("DB_DATABASE")}`
-            + `sslmode=verify-full&sslrootcert=${configService.get<string>("DB_CERT_PATH")}`
-        );
+            + `?sslmode=verify-full&sslrootcert=${configService.get<string>("DB_CERT_PATH")}`
 
-        this.checkPointer.setup()
+        this.checkPointer = PostgresSaver.fromConnString(this.connString);
+    }
+
+    async setUpCheckPointer(): Promise<void> {
+        if (!(await checkTableExists('checkpoint_migrations', this.connString))) {
+            this.logger.info("Generating checkpointer tables.")
+            await this.checkPointer.setup()
+        }
     }
 
     getAgent(modelName: string, sysMsg: BaseMessage, handler: LLMCallbackHandler, tools: DynamicStructuredTool[]) {
@@ -139,6 +146,8 @@ export class LangGraphAgentProvider {
             .addEdge("summariser", "__end__")
 
         // Finally, we compile it into a LangChain Runnable.
-        return workflow.compile();
+        return workflow.compile({
+            checkpointer: this.checkPointer
+        });
     }
 }

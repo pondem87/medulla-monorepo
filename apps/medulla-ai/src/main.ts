@@ -2,10 +2,13 @@ import { NestFactory } from '@nestjs/core';
 import { MedullaAiModule } from './medulla-ai.module';
 import { ConfigService } from '@nestjs/config';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
+import { LangGraphAgentProvider } from './llm-tools/agents/langgraph-agent.provider';
 
 async function bootstrap() {
   const app = await NestFactory.create(MedullaAiModule);
   const config = app.get<ConfigService>(ConfigService)
+  const agentProvider = app.get<LangGraphAgentProvider>(LangGraphAgentProvider)
+  await agentProvider.setUpCheckPointer()
 
   app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.RMQ,

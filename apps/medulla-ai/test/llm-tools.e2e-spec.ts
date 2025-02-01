@@ -12,6 +12,7 @@ import { ChatHistory } from '../src/llm-tools/entities/chat-history.entity';
 import { ChatMessage } from '../src/llm-tools/entities/chat-message.entity';
 import { SubscriptionService } from '../src/subscription/subscription.service';
 import { LONG_TEST_TIMEOUT, MessengerEventPattern, whatsappRmqClient } from '@app/medulla-common/common/constants';
+import { LangGraphAgentProvider } from '../src/llm-tools/agents/langgraph-agent.provider';
 
 describe('MedullaAiController (e2e)', () => {
     let app: INestApplication;
@@ -19,6 +20,7 @@ describe('MedullaAiController (e2e)', () => {
     let emitMessageSpy: jest.SpyInstance;
     let checkUserBalanceSpy: jest.SpyInstance;
     let updateUserBalanceSpy: jest.SpyInstance;
+    let langGraphAgentProvider: LangGraphAgentProvider
     let subscriptionService: SubscriptionService;
     let llmToolsController: LlmToolsController
     let llmModelRepo: Repository<LLMModel>
@@ -47,6 +49,9 @@ describe('MedullaAiController (e2e)', () => {
         llmPrefsRepo = moduleFixture.get<Repository<LLMPrefs>>(getRepositoryToken(LLMPrefs))
         chatHistoryRepo = moduleFixture.get<Repository<ChatHistory>>(getRepositoryToken(ChatHistory))
         chatMessageRepo = moduleFixture.get<Repository<ChatMessage>>(getRepositoryToken(ChatMessage))
+        langGraphAgentProvider = moduleFixture.get<LangGraphAgentProvider>(LangGraphAgentProvider)
+
+        await langGraphAgentProvider.setUpCheckPointer()
 
         // Spy on emit
         emitMessageSpy = jest.spyOn(testRmqClient, 'emit');
@@ -55,7 +60,7 @@ describe('MedullaAiController (e2e)', () => {
         await llmModelRepo.delete({})
         await llmPrefsRepo.delete({})
         await chatHistoryRepo.delete({})
-    }, LONG_TEST_TIMEOUT);
+    }, LONG_TEST_TIMEOUT * 2);
 
     afterEach(async () => {
         if (emitMessageSpy) emitMessageSpy.mockClear()
@@ -64,7 +69,7 @@ describe('MedullaAiController (e2e)', () => {
             llmPrefsRepo.delete({}),
             chatHistoryRepo.delete({})
         ])
-    }, LONG_TEST_TIMEOUT)
+    }, LONG_TEST_TIMEOUT * 2)
 
     it('should process message', async () => {
 
@@ -114,7 +119,7 @@ describe('MedullaAiController (e2e)', () => {
         expect(chatMsgs[0].message.type).toEqual("ai")
         expect(res).toBe(true)
 
-    }, LONG_TEST_TIMEOUT);
+    }, LONG_TEST_TIMEOUT * 2);
 
     it('should process message from 2 users', async () => {
 
@@ -185,7 +190,7 @@ describe('MedullaAiController (e2e)', () => {
         expect(res).toBe(true)
         expect(res1).toBe(true)
 
-    }, LONG_TEST_TIMEOUT);
+    }, LONG_TEST_TIMEOUT * 2);
 
     it('should catch low balance', async () => {
 
@@ -240,7 +245,7 @@ describe('MedullaAiController (e2e)', () => {
         expect(chatMsgs.length).toBe(0)
         expect(res).toBe(true)
 
-    }, LONG_TEST_TIMEOUT);
+    }, LONG_TEST_TIMEOUT * 2);
 
     it("should generate an image", async () => {
         textModelId = (await llmModelRepo.save(
@@ -301,5 +306,5 @@ describe('MedullaAiController (e2e)', () => {
             })
         expect(emitMessageSpy).toHaveBeenNthCalledWith(2, MessengerEventPattern, { contact: input.contact, text: expect.any(String), type: "text", conversationType: "service" })
         expect(res).toBe(true)
-    }, LONG_TEST_TIMEOUT)
+    }, LONG_TEST_TIMEOUT * 2)
 });
