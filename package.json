@@ -1,8 +1,8 @@
 {
   "name": "medulla",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "",
-  "author": "",
+  "author": "tendai pfidze",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
