@@ -57,9 +57,11 @@ export class LLMProcessStateMachineProvider {
         const llmPrefs = await this.llmPrefsService.getPrefs(input.contact.wa_id)
         const textModelName = llmPrefs.chatModel
         const handler = new LLMCallbackHandler()
-        const sysMsg = new SystemMessage("You are Medulla, a helpful AI assistant designed by Pfitztronic Proprietary Limited, based on a subscription service. You can generate both text and images for users using your tools based on the user's account privileges and credit.")
+        const sysMsgTxt = 
+            `You are Medulla, a helpful AI assistant designed by Pfitztronic Proprietary Limited, based on a subscription service.
+            You can generate both text and images, as well search the web for users using your tools based on the user's account privileges and credit.`
 
-        const compliledGraph = this.langGraphAgentProvider.getAgent(textModelName, sysMsg, handler, this.llmFuncToolsProvider.getTools(input.contact))
+        const compliledGraph = this.langGraphAgentProvider.getAgent(textModelName, sysMsgTxt, handler, this.llmFuncToolsProvider.getTools(input.contact))
 
         const chatMessageHistory = await this.chatMessageHistoryProvider.getChatMessageHistory({ userNumber: input.contact.wa_id })
 

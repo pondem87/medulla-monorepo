@@ -9,8 +9,6 @@ import { MedullaWhatsappModule } from "../src/medulla-whatsapp.module";
 import { ConfigService } from "@nestjs/config";
 import { LONG_TEST_TIMEOUT } from "@app/medulla-common/common/constants";
 import { MessengerRMQMessage } from "@app/medulla-common/common/message-queue-types";
-import { ImageMessageBody } from "@app/medulla-common/common/whatsapp-api-types";
-
 
 describe('WhatsappMessenger (e2e)', () => {
     let app: INestApplication;

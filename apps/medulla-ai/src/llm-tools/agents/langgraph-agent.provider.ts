@@ -56,7 +56,7 @@ export class LangGraphAgentProvider {
         }
     }
 
-    getAgent(modelName: string, sysMsg: BaseMessage, handler: LLMCallbackHandler, tools: DynamicStructuredTool[]) {
+    getAgent(modelName: string, sysMsgTxt: string, handler: LLMCallbackHandler, tools: DynamicStructuredTool[]) {
         const toolNode = new ToolNode(tools)
 
         const model = new ChatOpenAI({
@@ -91,6 +91,7 @@ export class LangGraphAgentProvider {
         }
 
         const callModel = async (state: typeof GraphStateAnnotation.State) => {
+            const sysMsg = new SystemMessage(`${sysMsgTxt}\n\nSummary from earlier conversation:\n${state.summary}`)
             const response = await model.invoke([sysMsg,...state.messages]);
     
             // We return a list, because this will get added to the existing list
