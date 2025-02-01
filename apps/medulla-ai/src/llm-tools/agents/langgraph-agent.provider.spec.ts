@@ -5,7 +5,7 @@ import { mockedLoggingService } from "../../common/mocks";
 import { ConfigModule } from "@nestjs/config";
 import { LLMCallbackHandler } from "../llm-callback-handler";
 import { BaseMessage, HumanMessage, SystemMessage } from "@langchain/core/messages";
-import { LONG_TEST_TIMEOUT, SHORT_TEST_TIMEOUT } from "@app/medulla-common/common/constants";
+import { LONG_TEST_TIMEOUT } from "@app/medulla-common/common/constants";
 import { DynamicStructuredTool } from "@langchain/core/tools";
 import { z } from "zod"
 
@@ -37,8 +37,8 @@ describe('LangGraphAgentProvider', () => {
         const f = jest.fn()
         const handler = new LLMCallbackHandler()
         const modelName = "gpt-4o-mini"
-        const sysMsg = new SystemMessage("You are Medulla, a helpful AI assistant.")
-        const cg = provider.getAgent(modelName, sysMsg, handler, [
+        const sysMsgTxt = "You are Medulla, a helpful AI assistant."
+        const cg = provider.getAgent(modelName, sysMsgTxt, handler, [
             new DynamicStructuredTool({
                 func: async () => {
                     f()
@@ -69,8 +69,8 @@ describe('LangGraphAgentProvider', () => {
         const f = jest.fn()
         const handler = new LLMCallbackHandler()
         const modelName = "gpt-4o-mini"
-        const sysMsg = new SystemMessage("You are Medulla, a helpful AI assistant.")
-        const cg = provider.getAgent(modelName, sysMsg, handler, [])
+        const sysMsgTxt = "You are Medulla, a helpful AI assistant."
+        const cg = provider.getAgent(modelName, sysMsgTxt, handler, [])
         const finState = await cg.invoke({
             messages: [new HumanMessage("Who are you?")],
         }, { configurable: { thread_id: "77255656"}})
