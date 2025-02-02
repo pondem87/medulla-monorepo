@@ -3,7 +3,7 @@ name: Test and deploy Medulla production
 on:
   push:
     branches:
-      - main-no-run
+      - main
 
 jobs:
   test-and-build:
