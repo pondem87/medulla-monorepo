@@ -417,51 +417,9 @@ export class ZimMobilePaymentService {
 
         if (message.interactive?.type !== "button_reply") {
             // Unsupported messages
-            const executePaymentMessage: MessengerRMQMessage = {
-                contact: context.contact,
-                type: "message-body",
-                conversationType: "service",
-                messageBody: {
-                    messaging_product: "whatsapp",
-                    recipient_type: "individual",
-                    to: context.contact.wa_id,
-                    type: "interactive",
-                    interactive: {
-                        type: "button",
-                        header: {
-                            type: "text",
-                            text: "Payment Confirmation"
-                        },
-                        body: {
-                            text: `You are about to initiate a payment of US$${context.payment.amount.toFixed(2)} using ${context.payment.method} for ${context.payment.number}. Notification email is ${context.payment.email}.`
-                        },
-                        footer: {
-                            text: MESSAGE_FOOTER_TEXT
-                        },
-                        action: {
-                            buttons: [
-                                {
-                                    type: "reply",
-                                    reply: {
-                                        id: confimPaymentId,
-                                        title: "Confirm Payment"
-                                    }
-                                },
-                                {
-                                    type: "reply",
-                                    reply: {
-                                        id: cancelPaymentId,
-                                        title: "Cancel Payment"
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-            this.whatsappQueueClient.emit(
-                MessengerEventPattern,
-                executePaymentMessage
+            this.sendTextMessage(
+                context,
+                `Use the "Confirm Payment" or "Cancel Payment" reply buttons to proceed or cancel processing of payment of US$${context.payment.amount}.`
             )
 
             return nochange
@@ -511,51 +469,9 @@ export class ZimMobilePaymentService {
                 } catch (error) {
                     this.logger.error("Payment failed with error", { error })
 
-                    const executePaymentMessage: MessengerRMQMessage = {
-                        contact: context.contact,
-                        type: "message-body",
-                        conversationType: "service",
-                        messageBody: {
-                            messaging_product: "whatsapp",
-                            recipient_type: "individual",
-                            to: context.contact.wa_id,
-                            type: "interactive",
-                            interactive: {
-                                type: "button",
-                                header: {
-                                    type: "text",
-                                    text: "Payment Confirmation"
-                                },
-                                body: {
-                                    text: `*Error: Failed to initiate payment!*\nYou are about to initiate a payment of US$${context.payment.amount.toFixed(2)} using ${context.payment.method} for ${context.payment.number}. Notification email is ${context.payment.email}.`
-                                },
-                                footer: {
-                                    text: MESSAGE_FOOTER_TEXT
-                                },
-                                action: {
-                                    buttons: [
-                                        {
-                                            type: "reply",
-                                            reply: {
-                                                id: confimPaymentId,
-                                                title: "Confirm Payment"
-                                            }
-                                        },
-                                        {
-                                            type: "reply",
-                                            reply: {
-                                                id: cancelPaymentId,
-                                                title: "Cancel Payment"
-                                            }
-                                        }
-                                    ]
-                                }
-                            }
-                        }
-                    }
-                    this.whatsappQueueClient.emit(
-                        MessengerEventPattern,
-                        executePaymentMessage
+                    this.sendTextMessage(
+                        context,
+                        `We failed to initiate processing of payment of US$${context.payment.amount}.`
                     )
 
                     return nochange
@@ -564,51 +480,9 @@ export class ZimMobilePaymentService {
             case cancelPaymentId:
                 return this.cancelPayment(context)
             default:
-                const executePaymentMessage: MessengerRMQMessage = {
-                    contact: context.contact,
-                    type: "message-body",
-                    conversationType: "service",
-                    messageBody: {
-                        messaging_product: "whatsapp",
-                        recipient_type: "individual",
-                        to: context.contact.wa_id,
-                        type: "interactive",
-                        interactive: {
-                            type: "button",
-                            header: {
-                                type: "text",
-                                text: "Payment Confirmation"
-                            },
-                            body: {
-                                text: `*Invalid response*\nYou are about to initiate a payment of US$${context.payment.amount.toFixed(2)} using ${context.payment.method} for ${context.payment.number}. Notification email is ${context.payment.email}.`
-                            },
-                            footer: {
-                                text: MESSAGE_FOOTER_TEXT
-                            },
-                            action: {
-                                buttons: [
-                                    {
-                                        type: "reply",
-                                        reply: {
-                                            id: confimPaymentId,
-                                            title: "Confirm Payment"
-                                        }
-                                    },
-                                    {
-                                        type: "reply",
-                                        reply: {
-                                            id: cancelPaymentId,
-                                            title: "Cancel Payment"
-                                        }
-                                    }
-                                ]
-                            }
-                        }
-                    }
-                }
-                this.whatsappQueueClient.emit(
-                    MessengerEventPattern,
-                    executePaymentMessage
+                this.sendTextMessage(
+                    context,
+                    `Use the "Confirm Payment" or "Cancel Payment" reply buttons to proceed or cancel processing of payment of US$${context.payment.amount}.`
                 )
 
                 return nochange
