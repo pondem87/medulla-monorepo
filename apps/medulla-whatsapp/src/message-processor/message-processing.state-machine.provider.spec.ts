@@ -25,6 +25,7 @@ describe('MessageProcessorController', () => {
 
 	const mockedZimMobilePaymentService = {
 		promptStartPayment: jest.fn(),
+		executeStartPayment: jest.fn(),
 		promptChooseMethod: jest.fn(),
 		promptSetNumber: jest.fn(),
 		promptSetEmail: jest.fn(),
@@ -36,7 +37,7 @@ describe('MessageProcessorController', () => {
 	}
 
 	const mockedHomeStateService = {
-        executeHomeState: null
+        executeHomeState: jest.fn()
     }
 
 	beforeEach(async () => {
