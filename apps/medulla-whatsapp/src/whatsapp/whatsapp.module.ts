@@ -16,7 +16,7 @@ import { whatsappRmqClient } from '@app/medulla-common/common/constants';
                 return ClientProxyFactory.create({
                     transport: Transport.RMQ,
                     options: {
-                        urls: [config.get<string>("MEDULLA_RMQ_URL")],
+                        urls: [`${config.get<string>("MEDULLA_RMQ_URL")}:${config.get<string>("MEDULLA_RMQ_PORT")}`],
                         queue: config.get<string>("WHATSAPP_RMQ_QUEUE_NAME"),
                         queueOptions: {
                             durable: config.get<boolean>("MEDULLA_RMQ_QUEUE_DURABLE")
