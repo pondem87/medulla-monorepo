@@ -1,4 +1,5 @@
-### Medulla
+### Medulla (deprecated)
+(deprecated) Rewriting in Java and following a more mature development process for maintainability, reliability and improved documentation
 
 ## Description
 
